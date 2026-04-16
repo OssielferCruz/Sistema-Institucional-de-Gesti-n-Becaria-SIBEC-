@@ -128,6 +128,3 @@ class ProgressViewSet(viewsets.ViewSet):
         progress = get_student_progress(student)
         serializer = StudentProgressSerializer(progress)
         return Response(serializer.data)
-from django.shortcuts import render
-
-# Create your views here.

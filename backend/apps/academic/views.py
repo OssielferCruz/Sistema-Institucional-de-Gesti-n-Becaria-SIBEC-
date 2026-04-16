@@ -21,6 +21,3 @@ class TermViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Term.objects.select_related('study_plan').all()
     serializer_class = TermSerializer
     permission_classes = [IsAuthenticated]
-from django.shortcuts import render
-
-# Create your views here.

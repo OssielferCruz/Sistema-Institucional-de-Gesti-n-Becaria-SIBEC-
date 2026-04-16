@@ -20,8 +20,8 @@ class HoursPolicy(UUIDTimeStampedModel):
 		ordering = ['-version']
 		constraints = [
 			models.UniqueConstraint(fields=['name', 'version'], name='uniq_policy_name_version'),
-			models.CheckConstraint(check=models.Q(annual_target_hours__gt=0), name='policy_target_positive'),
-			models.CheckConstraint(check=models.Q(valid_to__isnull=True) | models.Q(valid_to__gte=models.F('valid_from')), name='policy_dates_valid'),
+			models.CheckConstraint(condition=models.Q(annual_target_hours__gt=0), name='policy_target_positive'),
+			models.CheckConstraint(condition=models.Q(valid_to__isnull=True) | models.Q(valid_to__gte=models.F('valid_from')), name='policy_dates_valid'),
 		]
 
 
@@ -35,7 +35,7 @@ class HoursPolicySegment(UUIDTimeStampedModel):
 		ordering = ['policy', 'study_plan', 'period_sequence']
 		constraints = [
 			models.UniqueConstraint(fields=['policy', 'study_plan', 'period_sequence'], name='uniq_policy_plan_period'),
-			models.CheckConstraint(check=models.Q(target_hours__gte=0), name='policy_segment_non_negative'),
+			models.CheckConstraint(condition=models.Q(target_hours__gte=0), name='policy_segment_non_negative'),
 		]
 
 
@@ -55,8 +55,8 @@ class HoursLog(UUIDTimeStampedModel):
 	class Meta:
 		ordering = ['-work_date', '-created_at']
 		constraints = [
-			models.CheckConstraint(check=models.Q(end_time__gt=models.F('start_time')), name='hours_time_range_valid'),
-			models.CheckConstraint(check=models.Q(reported_hours__gt=0), name='hours_reported_positive'),
+			models.CheckConstraint(condition=models.Q(end_time__gt=models.F('start_time')), name='hours_time_range_valid'),
+			models.CheckConstraint(condition=models.Q(reported_hours__gt=0), name='hours_reported_positive'),
 		]
 
 
