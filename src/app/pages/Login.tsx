@@ -9,38 +9,43 @@ import { toast } from 'sonner';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); // Limpiar errores previos
+    setError('');
 
-    // Validar que los campos estén llenos
     if (!email || !password) {
       toast.error('Por favor completa todos los campos');
       setError('Por favor completa todos los campos');
       return;
     }
 
-    // Hacer login asíncrono
+    setIsSubmitting(true);
     login(email, password)
       .then(() => {
         toast.success('Inicio de sesión exitoso');
         navigate('/dashboard');
       })
-      .catch((error) => {
-        toast.error('Credenciales inválidas. Intenta con admin@ulsa.mx / 123456');
-        setError('Credenciales inválidas. Intenta con admin@ulsa.mx / 123456');
+      .catch(() => {
+        toast.error('Credenciales inválidas o backend no disponible. Intenta con admin@sibec.local / Admin123456!');
+        setError('Credenciales inválidas o backend no disponible. Intenta con admin@sibec.local / Admin123456!');
+      })
+      .finally(() => {
+        setIsSubmitting(false);
       });
   };
 
-  const quickLogin = (userEmail: string) => {
-    setEmail(userEmail);
-    setPassword('123456');
+  const quickLoginAdmin = () => {
+    setEmail('admin@sibec.local');
+    setPassword('Admin123456!');
   };
+
+  const disableForm = isSubmitting || isLoading;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2E7D32] to-[#1B5E20] flex items-center justify-center p-4">
@@ -75,6 +80,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={disableForm}
                   className="bg-[#F5F5F5] border-gray-200"
                 />
               </div>
@@ -88,57 +94,40 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={disableForm}
                   className="bg-[#F5F5F5] border-gray-200"
                 />
               </div>
 
+              {error && (
+                <p className="text-sm text-[#D32F2F]">{error}</p>
+              )}
+
               <Button
                 type="submit"
+                disabled={disableForm}
                 className="w-full bg-[#2E7D32] hover:bg-[#66BB6A] text-white"
               >
-                Iniciar Sesión
+                {isSubmitting ? 'Validando...' : 'Iniciar Sesión'}
               </Button>
             </form>
 
             {/* Quick Login Demo Buttons */}
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-500 mb-3 text-center">Demo: Acceso rápido por rol</p>
-              <div className="grid grid-cols-2 gap-2">
+              <p className="text-sm text-gray-500 mb-3 text-center">Acceso rápido de desarrollo</p>
+              <div className="grid grid-cols-1 gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('admin@ulsa.mx')}
+                  onClick={quickLoginAdmin}
                   className="text-xs"
+                  disabled={disableForm}
                 >
-                  Admin
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => quickLogin('jefatura@ulsa.mx')}
-                  className="text-xs"
-                >
-                  Jefatura
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => quickLogin('docente@ulsa.mx')}
-                  className="text-xs"
-                >
-                  Docente
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => quickLogin('estudiante@ulsa.mx')}
-                  className="text-xs"
-                >
-                  Estudiante
+                  Autocompletar Admin
                 </Button>
               </div>
               <p className="text-xs text-gray-400 mt-2 text-center">
-                Contraseña: 123456
+                Credenciales seed: admin@sibec.local / Admin123456!
               </p>
             </div>
           </CardContent>

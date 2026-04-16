@@ -31,5 +31,7 @@ export function debugAuthData() {
  */
 export function forceLogout() {
   sessionStorage.removeItem('sibec_user');
+  sessionStorage.removeItem('sibec_access_token');
+  sessionStorage.removeItem('sibec_refresh_token');
   window.location.href = '/login';
 }

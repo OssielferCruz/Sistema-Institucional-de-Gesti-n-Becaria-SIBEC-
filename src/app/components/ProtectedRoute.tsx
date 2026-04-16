@@ -7,14 +7,18 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isAuthenticated && !user) {
+    if (!isLoading && !isAuthenticated && !user) {
       navigate('/login', { replace: true });
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, isLoading, user, navigate]);
+
+  if (isLoading) {
+    return null;
+  }
 
   if (!isAuthenticated || !user) {
     return null;
