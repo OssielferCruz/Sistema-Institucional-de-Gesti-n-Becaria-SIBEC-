@@ -52,6 +52,19 @@ function parseHours(value: string): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+const AREA_PRESENTATION: Record<string, { subtitle: string; accent: string }> = {
+  'Asistencia Docente': { subtitle: 'Apoyo a jefaturas de carrera', accent: '#2E7D32' },
+  Biblioteca: { subtitle: 'Apoyo en biblioteca institucional', accent: '#1565C0' },
+  'Bienestar Estudiantil': { subtitle: 'Actividades deportivas y recreativas', accent: '#6A1B9A' },
+  'Extensión Universitaria': { subtitle: 'Actividades de extensión y servicio', accent: '#EF6C00' },
+  CIDTEA: { subtitle: 'Centro de Investigación y Desarrollo tecnológico', accent: '#0E8A9A' },
+  'Brigada Ambiental': { subtitle: 'Proyectos de sustentabilidad', accent: '#558B2F' },
+  'Comunicación Institucional': { subtitle: 'Difusión y contenido institucional', accent: '#00838F' },
+  Decanatura: { subtitle: 'Soporte académico y administrativo', accent: '#8E24AA' },
+  'Educación a Distancia': { subtitle: 'Acompañamiento virtual y soporte', accent: '#3949AB' },
+  'Registro Académico': { subtitle: 'Operación de control escolar', accent: '#5D4037' },
+};
+
 export const Asignaciones: React.FC = () => {
   const [assignments, setAssignments] = React.useState<AssignmentApiResponse[]>([]);
   const [hoursLogs, setHoursLogs] = React.useState<HoursLogApiResponse[]>([]);
@@ -204,7 +217,7 @@ export const Asignaciones: React.FC = () => {
   const accumulatedHours = hoursLogs.reduce((sum, log) => sum + parseHours(log.reported_hours), 0);
   const pendingHours = hoursLogs.filter((log) => log.status === 'registered').length;
 
-  const cardAccentPalette = ['#2E7D32', '#1565C0', '#6A1B9A', '#EF6C00', '#D32F2F'];
+  const cardAccentPalette = ['#2E7D32', '#1565C0', '#6A1B9A', '#EF6C00', '#0E8A9A', '#558B2F'];
 
   if (isLoading) {
     return (
@@ -369,7 +382,10 @@ export const Asignaciones: React.FC = () => {
       ) : viewMode === 'cards' ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
           {areaCards.map((area, index) => {
-            const accent = cardAccentPalette[index % cardAccentPalette.length];
+            const presentation = AREA_PRESENTATION[area.areaName];
+            const accent = presentation?.accent ?? cardAccentPalette[index % cardAccentPalette.length];
+            const subtitle = presentation?.subtitle ?? `${area.subareaCount} subáreas activas`;
+            const riskCount = area.pendingLogs > 0 ? Math.max(1, Math.round(area.pendingLogs / 4)) : 0;
             return (
               <Card key={area.areaId} className="bg-white border-none shadow-sm overflow-hidden">
                 <div className="h-2" style={{ backgroundColor: accent }} />
@@ -380,8 +396,8 @@ export const Asignaciones: React.FC = () => {
                         <Building2 className="w-6 h-6" style={{ color: accent }} />
                       </div>
                       <div>
-                        <h3 className="text-3xl font-semibold text-gray-900 leading-tight">{area.areaName}</h3>
-                        <p className="text-sm text-gray-500">{area.subareaCount} subáreas · {area.assignments.length} asignaciones</p>
+                        <h3 className="text-[34px] font-semibold text-gray-900 leading-tight">{area.areaName}</h3>
+                        <p className="text-sm text-gray-500">{subtitle}</p>
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-gray-400 mt-1" />
@@ -416,14 +432,14 @@ export const Asignaciones: React.FC = () => {
                     <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
                       {area.activeStudents} activos
                     </Badge>
+                    {riskCount > 0 && (
+                      <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
+                        {riskCount} riesgo
+                      </Badge>
+                    )}
                     <Badge variant="outline" className="border-violet-200 bg-violet-50 text-violet-700">
                       {area.subareaCount} subáreas
                     </Badge>
-                    {area.pendingLogs > 0 && (
-                      <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
-                        {area.pendingLogs} pendientes
-                      </Badge>
-                    )}
                   </div>
 
                   <div className="border-t pt-3 text-sm text-gray-600">

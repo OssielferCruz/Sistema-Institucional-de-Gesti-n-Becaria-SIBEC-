@@ -11,7 +11,7 @@ from apps.academic.models import Career, StudyPlan, Term
 from apps.accounts.models import Role, User
 from apps.approvals.models import HoursReview
 from apps.hours.models import HoursLog, HoursPolicy, HoursPolicySegment
-from apps.organization.models import Subarea
+from apps.organization.models import Area, Subarea
 from apps.scholarships.models import Assignment, DepartmentHeadProfile, Student, TeacherProfile
 
 
@@ -19,6 +19,55 @@ class Command(BaseCommand):
     help = 'Seed operational demo data (department heads, teachers, students, assignments, and hours logs).'
 
     DEFAULT_PASSWORD = 'Demo123456!'
+
+    AREA_CATALOG = {
+        'asistencia-docente': {
+            'name': 'Asistencia Docente',
+            'subareas': [
+                ('jefatura-ice-iem', 'Jefatura ICE/IEM'),
+                ('jefatura-ime', 'Jefatura IME'),
+                ('jefatura-ims-iel', 'Jefatura IMS/IEL'),
+                ('jefatura-igi', 'Jefatura IGI'),
+                ('jefatura-lcm-laf', 'Jefatura LCM/LAF'),
+            ],
+        },
+        'biblioteca': {
+            'name': 'Biblioteca',
+            'subareas': [('biblioteca-general', 'Biblioteca General')],
+        },
+        'bienestar-estudiantil': {
+            'name': 'Bienestar Estudiantil',
+            'subareas': [('danza', 'Danza'), ('futbol', 'Futbol'), ('voleibol', 'Voleibol')],
+        },
+        'extension-universitaria': {
+            'name': 'Extensión Universitaria',
+            'subareas': [('extension-coro', 'Coro')],
+        },
+        'cidtea': {
+            'name': 'CIDTEA',
+            'subareas': [('cidtea-lab', 'Taller y Laboratorio')],
+        },
+        'brigada-ambiental': {
+            'name': 'Brigada Ambiental',
+            'subareas': [('brigada-ambiental-general', 'Brigada Ambiental General')],
+        },
+        'comunicacion-institucional': {
+            'name': 'Comunicación Institucional',
+            'subareas': [('comunicacion-prensa', 'Prensa y Contenido')],
+        },
+        'decanatura': {
+            'name': 'Decanatura',
+            'subareas': [('decanatura-general', 'Decanatura General')],
+        },
+        'educacion-distancia': {
+            'name': 'Educación a Distancia',
+            'subareas': [('ead-soporte', 'Soporte Académico Virtual')],
+        },
+        'registro-academico': {
+            'name': 'Registro Académico',
+            'subareas': [('registro-operativo', 'Operación de Registro')],
+        },
+    }
 
     DEPARTMENT_HEADS = [
         {
@@ -134,6 +183,55 @@ class Command(BaseCommand):
             'last_name': 'Ortiz',
             'employee_code': 'DOC-009',
             'subarea_code': 'voleibol',
+        },
+        {
+            'email': 'docente.extension@sibec.local',
+            'first_name': 'Jorge',
+            'last_name': 'Hernandez',
+            'employee_code': 'DOC-010',
+            'subarea_code': 'extension-coro',
+        },
+        {
+            'email': 'docente.cidtea@sibec.local',
+            'first_name': 'Ricardo',
+            'last_name': 'Guzman',
+            'employee_code': 'DOC-011',
+            'subarea_code': 'cidtea-lab',
+        },
+        {
+            'email': 'docente.brigada@sibec.local',
+            'first_name': 'Mariana',
+            'last_name': 'Solano',
+            'employee_code': 'DOC-012',
+            'subarea_code': 'brigada-ambiental-general',
+        },
+        {
+            'email': 'docente.comunicacion@sibec.local',
+            'first_name': 'Raul',
+            'last_name': 'Espinoza',
+            'employee_code': 'DOC-013',
+            'subarea_code': 'comunicacion-prensa',
+        },
+        {
+            'email': 'docente.decanatura@sibec.local',
+            'first_name': 'Andres',
+            'last_name': 'Medina',
+            'employee_code': 'DOC-014',
+            'subarea_code': 'decanatura-general',
+        },
+        {
+            'email': 'docente.ead@sibec.local',
+            'first_name': 'Pablo',
+            'last_name': 'Jimenez',
+            'employee_code': 'DOC-015',
+            'subarea_code': 'ead-soporte',
+        },
+        {
+            'email': 'docente.registro@sibec.local',
+            'first_name': 'Sofia',
+            'last_name': 'Ruiz',
+            'employee_code': 'DOC-016',
+            'subarea_code': 'registro-operativo',
         },
     ]
 
@@ -266,11 +364,84 @@ class Command(BaseCommand):
             'career_code': 'iel',
             'subarea_code': 'voleibol',
         },
+        {
+            'email': 'estudiante.017@sibec.local',
+            'first_name': 'Julian',
+            'last_name': 'Rojas',
+            'student_code': 'EST017',
+            'career_code': 'ice',
+            'subarea_code': 'extension-coro',
+        },
+        {
+            'email': 'estudiante.018@sibec.local',
+            'first_name': 'Karla',
+            'last_name': 'Mora',
+            'student_code': 'EST018',
+            'career_code': 'ims',
+            'subarea_code': 'extension-coro',
+        },
+        {
+            'email': 'estudiante.019@sibec.local',
+            'first_name': 'Luis',
+            'last_name': 'Paz',
+            'student_code': 'EST019',
+            'career_code': 'iem',
+            'subarea_code': 'cidtea-lab',
+        },
+        {
+            'email': 'estudiante.020@sibec.local',
+            'first_name': 'Martha',
+            'last_name': 'Acosta',
+            'student_code': 'EST020',
+            'career_code': 'igi',
+            'subarea_code': 'cidtea-lab',
+        },
+        {
+            'email': 'estudiante.021@sibec.local',
+            'first_name': 'Nestor',
+            'last_name': 'Vega',
+            'student_code': 'EST021',
+            'career_code': 'ime',
+            'subarea_code': 'brigada-ambiental-general',
+        },
+        {
+            'email': 'estudiante.022@sibec.local',
+            'first_name': 'Olga',
+            'last_name': 'Ibarra',
+            'student_code': 'EST022',
+            'career_code': 'lcm',
+            'subarea_code': 'comunicacion-prensa',
+        },
+        {
+            'email': 'estudiante.023@sibec.local',
+            'first_name': 'Pedro',
+            'last_name': 'Suarez',
+            'student_code': 'EST023',
+            'career_code': 'laf',
+            'subarea_code': 'decanatura-general',
+        },
+        {
+            'email': 'estudiante.024@sibec.local',
+            'first_name': 'Quetzal',
+            'last_name': 'Lozano',
+            'student_code': 'EST024',
+            'career_code': 'iel',
+            'subarea_code': 'ead-soporte',
+        },
+        {
+            'email': 'estudiante.025@sibec.local',
+            'first_name': 'Rocio',
+            'last_name': 'Serrano',
+            'student_code': 'EST025',
+            'career_code': 'ims',
+            'subarea_code': 'registro-operativo',
+        },
     ]
 
     def handle(self, *args, **options):
         with transaction.atomic():
             self._validate_prerequisites()
+            self._seed_area_catalog()
 
             role_admin = Role.objects.get(code='admin')
             role_jefatura = Role.objects.get(code='jefatura')
@@ -299,6 +470,26 @@ class Command(BaseCommand):
             self.stdout.write(f'Students: {Student.objects.count()}')
             self.stdout.write(f'Assignments (active): {Assignment.objects.filter(status="active").count()}')
             self.stdout.write(f'Hours logs: {logs_count}')
+
+    def _seed_area_catalog(self):
+        for area_code, area_data in self.AREA_CATALOG.items():
+            area, _ = Area.objects.update_or_create(
+                code=area_code,
+                defaults={
+                    'name': area_data['name'],
+                    'is_active': True,
+                },
+            )
+
+            for subarea_code, subarea_name in area_data['subareas']:
+                Subarea.objects.update_or_create(
+                    area=area,
+                    code=subarea_code,
+                    defaults={
+                        'name': subarea_name,
+                        'is_active': True,
+                    },
+                )
 
     def _validate_prerequisites(self):
         missing_roles = [code for code in ['admin', 'jefatura', 'docente', 'estudiante'] if not Role.objects.filter(code=code).exists()]
