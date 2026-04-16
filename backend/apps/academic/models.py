@@ -43,7 +43,7 @@ class Term(UUIDTimeStampedModel):
 				fields=['academic_year', 'study_plan', 'sequence_number'],
 				name='uniq_academic_term_per_plan_sequence',
 			),
-			models.CheckConstraint(check=models.Q(start_date__lte=models.F('end_date')), name='term_dates_valid'),
+			models.CheckConstraint(condition=models.Q(start_date__lte=models.F('end_date')), name='term_dates_valid'),
 		]
 
 	def __str__(self) -> str:

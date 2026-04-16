@@ -26,6 +26,3 @@ class MeViewSet(viewsets.ViewSet):
     def profile(self, request):
         serializer = CurrentUserSerializer(request.user)
         return Response(serializer.data)
-from django.shortcuts import render
-
-# Create your views here.

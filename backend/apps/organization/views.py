@@ -16,6 +16,3 @@ class SubareaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Subarea.objects.select_related('area').all()
     serializer_class = SubareaSerializer
     permission_classes = [IsAuthenticated]
-from django.shortcuts import render
-
-# Create your views here.

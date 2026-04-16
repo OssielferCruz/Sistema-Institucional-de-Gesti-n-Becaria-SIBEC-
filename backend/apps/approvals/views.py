@@ -18,6 +18,3 @@ class HoursReviewViewSet(viewsets.ReadOnlyModelViewSet):
         if user.role and user.role.code == 'jefatura' and hasattr(user, 'department_head_profile'):
             return queryset.filter(reviewer=user.department_head_profile)
         return queryset.none()
-from django.shortcuts import render
-
-# Create your views here.
