@@ -1,0 +1,408 @@
+Diseña la interfaz completa de una aplicación web llamada SIBEC (Sistema Institucional de Gestión Becaria) utilizada por la Universidad Tecnológica La Salle (ULSA) para gestionar y monitorear las horas sociales de estudiantes becados.
+
+El sistema debe ser institucional, profesional, claro, organizado y orientado a procesos administrativos universitarios.
+
+La interfaz debe seguir principios de UI/UX modernos, navegación clara, dashboards informativos y diseño modular basado en componentes.
+
+1.	Contexto del Sistema
+
+SIBEC es una plataforma web institucional cuyo objetivo es centralizar el registro, control y seguimiento de las horas sociales de estudiantes becados.
+Actualmente el proceso se hace mediante cartillas físicas, lo cual genera:
+
+•	retrasos en información
+•	errores manuales
+•	falta de centralización
+•	dificultad de seguimiento
+
+El sistema permitirá que los distintos actores involucrados puedan registrar, consultar y supervisar el cumplimiento de horas sociales en tiempo real.
+
+2.	Tipos de Usuarios (Roles del Sistema)
+
+Diseñar la interfaz considerando 4 roles con diferentes paneles.
+
+1.	Personal de Bienestar Estudiantil (Administrador)
+
+Nivel de acceso: Total
+
+Puede:
+•	gestionar estudiantes becados
+•	asignar estudiantes a áreas
+•	asignar responsables (docentes)
+•	visualizar progreso global
+•	validar cumplimiento de horas
+•	generar reportes
+•	administrar el sistema
+
+Panel requerido:
+
+Dashboard administrativo completo
+
+2.	Jefatura de Carrera
+
+Nivel de acceso: medio
+
+Puede:
+
+•	ver estudiantes de su carrera
+•	consultar progreso
+•	aprobar registros de horas
+•	modificar asignaciones si es necesario
+•	supervisar cumplimiento
+
+Panel requerido:
+
+Dashboard de supervisión académica
+
+3.	Docente o Personal Responsable
+
+Nivel de acceso: operativo
+Puede:
+•	registrar horas sociales
+•	ingresar actividades realizadas
+•	registrar fecha y horario
+•	ver historial de los estudiantes asignados
+
+Panel requerido:
+Panel de registro de horas
+
+4.	Estudiante Becado
+
+Nivel de acceso: solo lectura
+
+Puede:
+•	visualizar sus horas acumuladas
+•	ver historial de actividades
+•	consultar su progreso
+•	ver su asignación actual
+
+Panel requerido:
+Dashboard personal de progreso
+ 
+3.	Estructura del Sistema (Sitemap)
+
+Diseñar navegación con sidebar + topbar institucional.
+
+Pantallas principales
+
+Autenticación
+
+Login institucional
+Campos:
+•	correo
+•	contraseña
+•	botón iniciar sesión
+Funciones:
+•	validación
+•	redirección según rol
+
+Dashboard (según rol)
+
+Componentes:
+•	tarjetas KPI
+•	progreso de horas
+•	notificaciones
+•	actividad reciente
+
+Gestión de Estudiantes
+
+Funciones:
+•	registrar estudiante
+•	editar estudiante
+•	eliminar estudiante
+•	ver información
+Tabla con:
+•	nombre
+•	carrera
+•	estado
+•	horas acumuladas
+•	área actual
+•	responsable
+
+Gestión de Asignaciones
+
+Permite:
+
+•	asignar estudiante
+•	seleccionar área
+•	seleccionar docente responsable
+•	seleccionar cuatrimestre
+Vista tipo:
+•	formulario
+•	tabla de asignaciones activas
+
+Registro de Horas
+
+Formulario para registrar:
+•	estudiante
+•	fecha
+•	hora inicio
+•	hora fin
+•	total de horas (calculado)
+•	descripción de actividades
+Tabla con historial.
+
+Aprobación de Horas
+
+Solo jefaturas o bienestar.
+
+Tabla con:
+•	estudiante
+•	actividad
+•	horas
+•	responsable
+•	estado
+Botones:
+•	aprobar
+•	rechazar
+
+Progreso del Estudiante
+
+Visualizaciones:
+•	barra de progreso
+•	gráfico de horas acumuladas
+•	historial por cuatrimestre
+•	área actual
+
+Reportes
+Filtros:
+•	carrera
+•	cuatrimestre
+•	área
+•	docente
+Opciones:
+•	exportar PDF
+•	exportar Excel
+Configuración
+
+Opciones:
+•	gestión de roles
+•	áreas institucionales
+•	cuatrimestres
+•	usuarios
+
+4.	Componentes de UI
+
+Diseñar componentes reutilizables:
+
+Formularios
+
+Inputs:
+•	texto
+•	select
+•	fecha
+•	hora
+•	textarea
+Validaciones visuales.
+
+Tablas Administrativas
+
+Columnas ordenables
+Búsqueda
+Filtros
+Paginación
+
+Dashboard Widgets
+
+Tarjetas KPI:
+•	estudiantes activos
+•	horas registradas
+•	horas pendientes
+•	cumplimiento promedio
+
+Visualización de datos
+
+Gráficos:
+•	barras
+•	progreso
+•	historial
+ 
+5.	Estilo Visual
+
+El diseño de la aplicación debe utilizar una paleta minimalista basada principalmente en verde y blanco, para mantener una apariencia institucional, limpia y profesional.
+
+Color primario
+Verde institucional
+HEX
+#2E7D32
+
+Uso:
+•	sidebar
+•	navbar superior
+•	botones principales
+•	encabezados
+•	elementos activos
+•	barras de progreso
+•	gráficos del dashboard
+
+Este color representa:
+•	organización
+•	progreso
+•	cumplimiento
+•	crecimiento académico
+
+Color secundario
+Verde claro
+HEX
+#66BB6A
+
+Uso:
+•	hover de botones
+•	indicadores
+•	elementos destacados
+•	iconos activos
+•	barras de progreso secundarias
+
+Color de fondo
+
+Blanco
+HEX
+#FFFFFF
+Uso:
+•	fondo principal
+•	formularios
+•	tablas
+•	tarjetas del dashboard
+
+El blanco ayuda a mantener una interfaz limpia, clara y fácil de leer.
+
+Colores neutros
+
+Gris claro
+#F5F5F5
+Para:
+•	fondo de secciones
+•	separadores
+•	tablas
+
+Gris oscuro
+#424242
+Para:
+•	texto
+•	etiquetas
+•	iconos
+
+Colores de estado del sistema
+
+Aprobado
+Verde oscuro
+#1B5E20
+
+Pendiente
+Amarillo
+#FBC02D
+
+Rechazado
+Rojo
+#D32F2F
+
+Aplicación en la interfaz
+
+Sidebar
+
+Color: verde institucional
+Texto: blanco
+Iconos: blanco
+Elemento activo:
+•	verde más oscuro
+•	indicador lateral.
+ 
+Dashboard
+
+Fondo general:
+gris muy claro
+Tarjetas:
+blancas
+Encabezados:
+verde institucional.
+
+Botones
+
+Primario
+verde institucional
+
+Hover
+verde claro
+
+Secundario
+blanco con borde verde
+
+Barras de progreso de horas sociales
+
+Fondo gris claro
+Progreso verde.
+
+6.	Layout del Sistema
+
+Usar layout de aplicación administrativa moderna.
+
+Estructura:
+
+Sidebar izquierda
+•	Dashboard
+•	Estudiantes
+•	Asignaciones
+•	Registro de horas
+•	Aprobaciones
+•	Reportes
+•	Configuración
+
+Topbar superior
+•	nombre del usuario
+•	rol
+•	notificaciones
+•	logout
+ 
+Área central
+contenido dinámico.
+
+7.	Experiencia de Usuario (UX)
+
+Priorizar:
+•	navegación rápida
+•	pocos pasos para registrar horas
+•	visualización clara del progreso
+•	interfaces limpias
+•	tablas fáciles de leer
+•	dashboards informativos
+
+Flujos principales:
+Login → Dashboard → Acción principal.
+
+8.	Diseño Responsive
+
+Diseñar para:
+Desktop (principal)
+Tablet
+Mobile básico para estudiantes.
+
+9.	Prototipo Interactivo
+
+Agregar interacciones:
+•	navegación entre paneles
+•	abrir formularios
+•	estados de aprobación
+•	simulación de progreso
+
+10.	Sistema de Componentes (Design System)
+
+Crear librería con:
+•	botones
+•	inputs
+•	tarjetas
+•	tablas
+•	modales
+•	badges de estado
+•	gráficos
+•	layouts de dashboard
+
+11.	Resultado esperado
+
+El diseño debe generar:
+•	sitemap completo
+•	wireframes
+•	UI final
+•	dashboards por rol
+•	componentes reutilizables
+•	prototipo navegable
+
+El estilo debe reflejar un sistema institucional universitario profesional, moderno y altamente organizado.

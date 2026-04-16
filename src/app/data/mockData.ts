@@ -1,0 +1,2744 @@
+// Mock data para el sistema SIBEC
+
+export interface Estudiante {
+  id: string;
+  nombre: string;
+  matricula: string;
+  carrera: string;
+  email: string;
+  horasRequeridas: number;
+  horasCompletadas: number; // Total de horas aprobadas en el año
+  horasAcumuladas: number; // Alias de horasCompletadas para compatibilidad
+  horasCompletadasPeriodo: number; // Horas aprobadas en el periodo actual
+  periodoActual: 1 | 2 | 3; // Periodo actual (1=ENE-ABR, 2=MAY-AGO, 3=SEP-DIC)
+  estado: 'activo' | 'inactivo' | 'completado';
+  areaActual?: string;
+  subarea?: string;
+  docenteResponsableId?: string;
+  docenteResponsable?: string;
+  cuatrimestre: string;
+  cursoAsignado?: string;
+}
+
+export interface Docente {
+  id: string;
+  nombre: string;
+  email: string;
+  area: string;
+  subarea?: string;
+  jefaturaAsignada?: string; // Para Asistencia Docente
+  carrerasAsignadas?: string[]; // Carreras que maneja este docente
+  estudiantesAsignados: string[]; // IDs de estudiantes
+}
+
+export interface Asignacion {
+  id: string;
+  estudianteId: string;
+  estudianteNombre: string;
+  area: string;
+  subarea?: string;
+  responsable: string;
+  docenteResponsable?: string;
+  cuatrimestre: string;
+  fechaInicio: string;
+  fechaFin?: string;
+  estado: 'activa' | 'finalizada';
+}
+
+export interface RegistroHora {
+  id: string;
+  estudianteId: string;
+  estudianteNombre: string;
+  docenteId: string;
+  docenteNombre: string;
+  fecha: string;
+  horaInicio: string;
+  horaFin: string;
+  totalHoras: number;
+  descripcion: string;
+  area: string;
+  subarea?: string;
+  carrera: string;
+  estado: 'pendiente' | 'aprobada' | 'rechazada';
+  aprobadoPor?: string;
+  fechaAprobacion?: string;
+  comentario?: string;
+}
+
+export interface Area {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  subareas?: Subarea[];
+}
+
+export interface Subarea {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  tieneEncargado: boolean;
+}
+
+// ÁREAS Y SUBÁREAS DEL SISTEMA
+export const areas: Area[] = [
+  {
+    id: 'asistencia-docente',
+    nombre: 'Asistencia Docente',
+    descripcion: 'Apoyo a jefaturas de carrera',
+    subareas: [
+      { id: 'jef-ice-iem', nombre: 'Jefatura ICE/IEM', descripcion: 'Apoyo académico y administrativo a la jefatura de Ingeniería en Cibernética Electrónica e Ingeniería Electromédica.', tieneEncargado: true },
+      { id: 'jef-ime', nombre: 'Jefatura IME', descripcion: 'Soporte a la jefatura de Ingeniería Mecánica y Energías Renovables en actividades académicas y logísticas.', tieneEncargado: true },
+      { id: 'jef-ims-iel', nombre: 'Jefatura IMS/IEL', descripcion: 'Asistencia a la jefatura de Ingeniería Mecatrónica e Ingeniería Eléctrica en gestión de estudiantes.', tieneEncargado: true },
+      { id: 'jef-igi', nombre: 'Jefatura IGI', descripcion: 'Apoyo a la jefatura de Ingeniería en Gestión Industrial en coordinación de cursos y atención a alumnos.', tieneEncargado: true },
+      { id: 'jef-lcm-laf', nombre: 'Jefatura LCM/LAF', descripcion: 'Asistencia administrativa a las licenciaturas Comercial y Administrativa en trámites y seguimiento estudiantil.', tieneEncargado: true }
+    ]
+  },
+  {
+    id: 'biblioteca',
+    nombre: 'Biblioteca',
+    descripcion: 'Apoyo en biblioteca institucional'
+  },
+  {
+    id: 'bienestar-estudiantil',
+    nombre: 'Bienestar Estudiantil',
+    descripcion: 'Actividades deportivas y recreativas',
+    subareas: [
+      { id: 'danza', nombre: 'Danza', descripcion: 'Coordinación de ensayos y presentaciones del grupo de danza institucional.', tieneEncargado: true },
+      { id: 'futbol', nombre: 'Fútbol', descripcion: 'Apoyo logístico y organizativo del equipo de fútbol en entrenamientos y torneos.', tieneEncargado: true },
+      { id: 'voleibol', nombre: 'Voleibol', descripcion: 'Gestión deportiva del equipo de voleibol, incluyendo logística de prácticas y competencias.', tieneEncargado: true }
+    ]
+  },
+  {
+    id: 'extension-universitaria',
+    nombre: 'Extensión Universitaria',
+    descripcion: 'Actividades de extensión y servicio',
+    subareas: [
+      { id: 'coro', nombre: 'Coro', descripcion: 'Participación y apoyo en ensayos y presentaciones del coro universitario.', tieneEncargado: true },
+      { id: 'misioneros', nombre: 'Misioneros', descripcion: 'Organización de actividades de servicio social comunitario y misiones solidarias.', tieneEncargado: true },
+      { id: 'brigada-ext', nombre: 'Brigada Ambiental', descripcion: 'Proyectos de concientización ambiental y actividades ecológicas en la comunidad.', tieneEncargado: true }
+    ]
+  },
+  {
+    id: 'cidtea',
+    nombre: 'CIDTEA',
+    descripcion: 'Centro de Investigación y Desarrollo Tecnológico',
+    subareas: [
+      { id: 'taller-lab', nombre: 'Taller y Laboratorio', descripcion: 'Apoyo en mantenimiento y organización de talleres y laboratorios de investigación.', tieneEncargado: true },
+      { id: 'proyectos-inv', nombre: 'Proyectos de Investigación Ambiental', descripcion: 'Colaboración en proyectos de investigación enfocados en tecnología y medio ambiente.', tieneEncargado: true }
+    ]
+  },
+  {
+    id: 'brigada-ambiental',
+    nombre: 'Brigada Ambiental',
+    descripcion: 'Proyectos de sustentabilidad'
+  },
+  {
+    id: 'comunicacion',
+    nombre: 'Comunicación Institucional',
+    descripcion: 'Apoyo en comunicación y difusión'
+  },
+  {
+    id: 'decanatura',
+    nombre: 'Decanatura',
+    descripcion: 'Apoyo administrativo a decanatura'
+  },
+  {
+    id: 'educacion-distancia',
+    nombre: 'Educación a Distancia',
+    descripcion: 'Apoyo a plataformas virtuales'
+  },
+  {
+    id: 'registro-academico',
+    nombre: 'Registro Académico',
+    descripcion: 'Apoyo en servicios escolares'
+  }
+];
+
+// CARRERAS DEL SISTEMA
+export const carreras = [
+  'ICE - Ingeniería en Cibernética Electrónica',
+  'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+  'IGI - Ingeniería en Gestión Industrial',
+  'IME - Ingeniería Mecánica y Energías Renovables',
+  'IEM - Ingeniería Electromédica',
+  'IEL - Ingeniería Eléctrica',
+  'LAF - Licenciatura Administrativa con énfasis en Finanzas',
+  'LCM - Licenciatura Comercial con Énfasis en Mercadeo'
+];
+
+export const cuatrimestres = [
+  'ENE-ABR 2024',
+  'MAY-AGO 2024',
+  'SEP-DIC 2024',
+  'ENE-ABR 2025',
+  'MAY-AGO 2025',
+  'SEP-DIC 2025',
+  'ENE-ABR 2026',
+  'MAY-AGO 2026',
+  'SEP-DIC 2026'
+];
+
+// DOCENTES RESPONSABLES DE ÁREAS/SUBÁREAS
+export const mockDocentes: Docente[] = [
+  {
+    id: 'doc-1',
+    nombre: 'Dr. Roberto Méndez',
+    email: 'docente@ulsa.mx',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    jefaturaAsignada: 'ICE/IEM',
+    carrerasAsignadas: ['ICE - Ingeniería en Cibernética Electrónica', 'IEM - Ingeniería Electromédica'],
+    estudiantesAsignados: ['est-1', 'est-2', 'est-16'] // Agregado est-16 para tener 3 estudiantes
+  },
+  {
+    id: 'doc-2',
+    nombre: 'Ing. Patricia Flores',
+    email: 'patricia.flores@ulsa.mx',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IME',
+    jefaturaAsignada: 'IME',
+    carrerasAsignadas: ['IME - Ingeniería Mecánica y Energías Renovables'],
+    estudiantesAsignados: ['est-3']
+  },
+  {
+    id: 'doc-3',
+    nombre: 'Mtro. Fernando Silva',
+    email: 'fernando.silva@ulsa.mx',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    jefaturaAsignada: 'IMS/IEL',
+    carrerasAsignadas: ['IMS - Ingeniería Mecatrónica y Sistemas de Control', 'IEL - Ingeniería Eléctrica'],
+    estudiantesAsignados: ['est-4', 'est-5']
+  },
+  {
+    id: 'doc-4',
+    nombre: 'Ing. Laura Ramírez',
+    email: 'laura.ramirez@ulsa.mx',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IGI',
+    jefaturaAsignada: 'IGI',
+    carrerasAsignadas: ['IGI - Ingeniería en Gestión Industrial'],
+    estudiantesAsignados: ['est-6']
+  },
+  {
+    id: 'doc-5',
+    nombre: 'Lic. Carlos Vega',
+    email: 'carlos.vega@ulsa.mx',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura LCM/LAF',
+    jefaturaAsignada: 'LCM/LAF',
+    carrerasAsignadas: ['LCM - Licenciatura Comercial con Énfasis en Mercadeo', 'LAF - Licenciatura Administrativa con énfasis en Finanzas'],
+    estudiantesAsignados: ['est-7', 'est-8']
+  },
+  {
+    id: 'doc-6',
+    nombre: 'Lic. Ana Martínez',
+    email: 'ana.martinez@ulsa.mx',
+    area: 'Biblioteca',
+    estudiantesAsignados: ['est-9', 'est-10']
+  },
+  {
+    id: 'doc-7',
+    nombre: 'Prof. Miguel Torres',
+    email: 'miguel.torres@ulsa.mx',
+    area: 'Bienestar Estudiantil',
+    subarea: 'Danza',
+    estudiantesAsignados: ['est-11']
+  },
+  {
+    id: 'doc-8',
+    nombre: 'Prof. Daniel Castro',
+    email: 'daniel.castro@ulsa.mx',
+    area: 'Bienestar Estudiantil',
+    subarea: 'Fútbol',
+    estudiantesAsignados: ['est-12']
+  },
+  {
+    id: 'doc-9',
+    nombre: 'Profa. Sandra Ortiz',
+    email: 'sandra.ortiz@ulsa.mx',
+    area: 'Bienestar Estudiantil',
+    subarea: 'Voleibol',
+    estudiantesAsignados: ['est-13']
+  },
+  {
+    id: 'doc-10',
+    nombre: 'Mtro. Ricardo Guzmán',
+    email: 'ricardo.guzman@ulsa.mx',
+    area: 'CIDTEA',
+    subarea: 'Taller y Laboratorio',
+    carrerasAsignadas: ['IMS - Ingeniería Mecatrónica y Sistemas de Control', 'IEL - Ingeniería Eléctrica', 'IME - Ingeniería Mecánica y Energías Renovables'],
+    estudiantesAsignados: ['est-14', 'est-15']
+  },
+  {
+    id: 'doc-11',
+    nombre: 'Ing. Gabriela Moreno',
+    email: 'gabriela.moreno@ulsa.mx',
+    area: 'Biblioteca',
+    estudiantesAsignados: ['est-17', 'est-18', 'est-19']
+  },
+  {
+    id: 'doc-12',
+    nombre: 'Lic. Jorge Hernández',
+    email: 'jorge.hernandez@ulsa.mx',
+    area: 'Extensión Universitaria',
+    subarea: 'Coro',
+    estudiantesAsignados: ['est-20', 'est-21']
+  },
+  {
+    id: 'doc-13',
+    nombre: 'Mtro. Eduardo Reyes',
+    email: 'eduardo.reyes@ulsa.mx',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    jefaturaAsignada: 'IMS/IEL',
+    carrerasAsignadas: ['IMS - Ingeniería Mecatrónica y Sistemas de Control', 'IEL - Ingeniería Eléctrica'],
+    estudiantesAsignados: ['est-22', 'est-23']
+  },
+  {
+    id: 'doc-14',
+    nombre: 'Ing. Sofía Ruiz',
+    email: 'sofia.ruiz@ulsa.mx',
+    area: 'CIDTEA',
+    subarea: 'Taller y Laboratorio',
+    carrerasAsignadas: ['IMS - Ingeniería Mecatrónica y Sistemas de Control', 'IEL - Ingeniería Eléctrica', 'ICE - Ingeniería en Cibernética Electrónica'],
+    estudiantesAsignados: ['est-24', 'est-25']
+  },
+  {
+    id: 'doc-15',
+    nombre: 'Prof. Andrés Medina',
+    email: 'andres.medina@ulsa.mx',
+    area: 'Extensión Universitaria',
+    subarea: 'Misioneros',
+    estudiantesAsignados: ['est-26']
+  },
+  {
+    id: 'doc-16',
+    nombre: 'Dra. Carmen Delgado',
+    email: 'carmen.delgado@ulsa.mx',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    jefaturaAsignada: 'ICE/IEM',
+    carrerasAsignadas: ['ICE - Ingeniería en Cibernética Electrónica', 'IEM - Ingeniería Electromédica'],
+    estudiantesAsignados: ['est-27', 'est-28']
+  },
+  {
+    id: 'doc-17',
+    nombre: 'Mtro. Pablo Jiménez',
+    email: 'pablo.jimenez@ulsa.mx',
+    area: 'CIDTEA',
+    subarea: 'Proyectos de Investigación Ambiental',
+    carrerasAsignadas: ['IMS - Ingeniería Mecatrónica y Sistemas de Control', 'IEL - Ingeniería Eléctrica'],
+    estudiantesAsignados: ['est-29', 'est-30']
+  },
+  {
+    id: 'doc-18',
+    nombre: 'Prof. Raúl Espinoza',
+    email: 'raul.espinoza@ulsa.mx',
+    area: 'Extensión Universitaria',
+    subarea: 'Brigada Ambiental',
+    estudiantesAsignados: ['est-31', 'est-32']
+  },
+  {
+    id: 'doc-19',
+    nombre: 'Lic. Mariana Solano',
+    email: 'mariana.solano@ulsa.mx',
+    area: 'Brigada Ambiental',
+    estudiantesAsignados: ['est-33', 'est-34']
+  },
+  {
+    id: 'doc-20',
+    nombre: 'Lic. Héctor Villanueva',
+    email: 'hector.villanueva@ulsa.mx',
+    area: 'Comunicación Institucional',
+    estudiantesAsignados: ['est-35', 'est-36']
+  },
+  {
+    id: 'doc-21',
+    nombre: 'Dra. Lorena Campos',
+    email: 'lorena.campos@ulsa.mx',
+    area: 'Decanatura',
+    estudiantesAsignados: ['est-37', 'est-38']
+  },
+  {
+    id: 'doc-22',
+    nombre: 'Ing. Oscar Paredes',
+    email: 'oscar.paredes@ulsa.mx',
+    area: 'Educación a Distancia',
+    estudiantesAsignados: ['est-39', 'est-40']
+  },
+  {
+    id: 'doc-23',
+    nombre: 'Lic. Rosa Elena Fuentes',
+    email: 'rosa.fuentes@ulsa.mx',
+    area: 'Registro Académico',
+    estudiantesAsignados: ['est-41', 'est-42']
+  }
+];
+
+// ESTUDIANTES BECADOS
+export const mockEstudiantes: Estudiante[] = [
+  {
+    id: 'est-1',
+    nombre: 'Juan Carlos Pérez García',
+    matricula: '2021001',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    email: 'juan.perez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 55,
+    horasAcumuladas: 55,
+    horasCompletadasPeriodo: 55,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    docenteResponsableId: 'doc-1',
+    docenteResponsable: 'Dr. Roberto Méndez',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Programación Avanzada'
+  },
+  {
+    id: 'est-2',
+    nombre: 'María Fernanda López Hernández',
+    matricula: '2021002',
+    carrera: 'IEM - Ingeniería Electromédica',
+    email: 'maria.lopez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 48,
+    horasAcumuladas: 48,
+    horasCompletadasPeriodo: 48,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    docenteResponsableId: 'doc-1',
+    docenteResponsable: 'Dr. Roberto Méndez',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Circuitos Electrónicos II'
+  },
+  {
+    id: 'est-3',
+    nombre: 'Carlos Alberto Sánchez Morales',
+    matricula: '2020015',
+    carrera: 'IME - Ingeniería Mecánica y Energías Renovables',
+    email: 'carlos.sanchez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 142,
+    horasAcumuladas: 142,
+    horasCompletadasPeriodo: 142,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura IME',
+    docenteResponsableId: 'doc-2',
+    docenteResponsable: 'Ing. Patricia Flores',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Termodinámica Aplicada'
+  },
+  {
+    id: 'est-4',
+    nombre: 'Ana Patricia Ramírez Torres',
+    matricula: '2021010',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    email: 'ana.ramirez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 68,
+    horasAcumuladas: 68,
+    horasCompletadasPeriodo: 68,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    docenteResponsableId: 'doc-3',
+    docenteResponsable: 'Mtro. Fernando Silva',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Sistemas de Control Automático'
+  },
+  {
+    id: 'est-5',
+    nombre: 'Luis Eduardo Martínez Cruz',
+    matricula: '2021015',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    email: 'luis.martinez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 92,
+    horasAcumuladas: 92,
+    horasCompletadasPeriodo: 92,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    docenteResponsableId: 'doc-3',
+    docenteResponsable: 'Mtro. Fernando Silva',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Máquinas Eléctricas'
+  },
+  {
+    id: 'est-6',
+    nombre: 'Diana Isabel González Ruiz',
+    matricula: '2021020',
+    carrera: 'IGI - Ingeniería en Gestión Industrial',
+    email: 'diana.gonzalez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 115,
+    horasAcumuladas: 115,
+    horasCompletadasPeriodo: 115,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura IGI',
+    docenteResponsableId: 'doc-4',
+    docenteResponsable: 'Ing. Laura Ramírez',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Gestión de Operaciones'
+  },
+  {
+    id: 'est-7',
+    nombre: 'Roberto Carlos Moreno Díaz',
+    matricula: '2021025',
+    carrera: 'LCM - Licenciatura Comercial con Énfasis en Mercadeo',
+    email: 'roberto.moreno@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 75,
+    horasAcumuladas: 75,
+    horasCompletadasPeriodo: 75,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura LCM/LAF',
+    docenteResponsableId: 'doc-5',
+    docenteResponsable: 'Lic. Carlos Vega',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Investigación de Mercados'
+  },
+  {
+    id: 'est-8',
+    nombre: 'Patricia Sofía Vázquez Reyes',
+    matricula: '2021030',
+    carrera: 'LAF - Licenciatura Administrativa con énfasis en Finanzas',
+    email: 'patricia.vazquez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 128,
+    horasAcumuladas: 128,
+    horasCompletadasPeriodo: 128,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura LCM/LAF',
+    docenteResponsableId: 'doc-5',
+    docenteResponsable: 'Lic. Carlos Vega',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Contabilidad Financiera'
+  },
+  {
+    id: 'est-9',
+    nombre: 'Jorge Enrique Castillo Mendoza',
+    matricula: '2021035',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    email: 'jorge.castillo@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 82,
+    horasAcumuladas: 82,
+    horasCompletadasPeriodo: 82,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Biblioteca',
+    docenteResponsableId: 'doc-6',
+    docenteResponsable: 'Lic. Ana Martínez',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-10',
+    nombre: 'Gabriela Monserrat Herrera Núñez',
+    matricula: '2021040',
+    carrera: 'LAF - Licenciatura Administrativa con énfasis en Finanzas',
+    email: 'gabriela.herrera@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 105,
+    horasAcumuladas: 105,
+    horasCompletadasPeriodo: 105,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Biblioteca',
+    docenteResponsableId: 'doc-6',
+    docenteResponsable: 'Lic. Ana Martínez',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-11',
+    nombre: 'Andrea Valeria Romero Silva',
+    matricula: '2021045',
+    carrera: 'LCM - Licenciatura Comercial con Énfasis en Mercadeo',
+    email: 'andrea.romero@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 38,
+    horasAcumuladas: 38,
+    horasCompletadasPeriodo: 38,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Bienestar Estudiantil',
+    subarea: 'Danza',
+    docenteResponsableId: 'doc-7',
+    docenteResponsable: 'Prof. Miguel Torres',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-12',
+    nombre: 'Diego Alejandro Jiménez Ponce',
+    matricula: '2021050',
+    carrera: 'IGI - Ingeniería en Gestión Industrial',
+    email: 'diego.jimenez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 135,
+    horasAcumuladas: 135,
+    horasCompletadasPeriodo: 135,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Bienestar Estudiantil',
+    subarea: 'Fútbol',
+    docenteResponsableId: 'doc-8',
+    docenteResponsable: 'Prof. Daniel Castro',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-13',
+    nombre: 'Sofía Alejandra Navarro Campos',
+    matricula: '2021055',
+    carrera: 'IEM - Ingeniería Electromédica',
+    email: 'sofia.navarro@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 95,
+    horasAcumuladas: 95,
+    horasCompletadasPeriodo: 95,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Bienestar Estudiantil',
+    subarea: 'Voleibol',
+    docenteResponsableId: 'doc-9',
+    docenteResponsable: 'Profa. Sandra Ortiz',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-14',
+    nombre: 'Fernando Javier Torres Aguilar',
+    matricula: '2021060',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    email: 'fernando.torres@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 110,
+    horasAcumuladas: 110,
+    horasCompletadasPeriodo: 110,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'CIDTEA',
+    subarea: 'Taller y Laboratorio',
+    docenteResponsableId: 'doc-10',
+    docenteResponsable: 'Mtro. Ricardo Guzmán',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-15',
+    nombre: 'Valeria Estefanía Morales León',
+    matricula: '2021065',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    email: 'valeria.morales@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 150,
+    horasAcumuladas: 150,
+    horasCompletadasPeriodo: 150,
+    periodoActual: 1,
+    estado: 'completado',
+    areaActual: 'CIDTEA',
+    subarea: 'Taller y Laboratorio',
+    docenteResponsableId: 'doc-10',
+    docenteResponsable: 'Mtro. Ricardo Guzmán',
+    cuatrimestre: 'SEP-DIC 2025'
+  },
+  {
+    id: 'est-16',
+    nombre: 'Luis Alberto López Ramírez',
+    matricula: '2021070',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    email: 'luis.lopez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 70,
+    horasAcumuladas: 70,
+    horasCompletadasPeriodo: 70,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    docenteResponsableId: 'doc-1',
+    docenteResponsable: 'Dr. Roberto Méndez',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Sistemas Digitales I'
+  },
+  {
+    id: 'est-17',
+    nombre: 'María Guadalupe Ramírez López',
+    matricula: '2021075',
+    carrera: 'LCM - Licenciatura Comercial con Énfasis en Mercadeo',
+    email: 'maria.ramirez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 60,
+    horasAcumuladas: 60,
+    horasCompletadasPeriodo: 60,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Biblioteca',
+    docenteResponsableId: 'doc-11',
+    docenteResponsable: 'Ing. Gabriela Moreno',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-18',
+    nombre: 'Carlos Eduardo Hernández Mendoza',
+    matricula: '2021080',
+    carrera: 'LAF - Licenciatura Administrativa con énfasis en Finanzas',
+    email: 'carlos.hernandez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 55,
+    horasAcumuladas: 55,
+    horasCompletadasPeriodo: 55,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Biblioteca',
+    docenteResponsableId: 'doc-11',
+    docenteResponsable: 'Ing. Gabriela Moreno',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-19',
+    nombre: 'Ana Sofía López Ramírez',
+    matricula: '2021085',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    email: 'ana.lopez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 45,
+    horasAcumuladas: 45,
+    horasCompletadasPeriodo: 45,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Biblioteca',
+    docenteResponsableId: 'doc-11',
+    docenteResponsable: 'Ing. Gabriela Moreno',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-20',
+    nombre: 'Diego Antonio Martínez Hernández',
+    matricula: '2021090',
+    carrera: 'LCM - Licenciatura Comercial con Énfasis en Mercadeo',
+    email: 'diego.martinez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 50,
+    horasAcumuladas: 50,
+    horasCompletadasPeriodo: 50,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Extensión Universitaria',
+    subarea: 'Coro',
+    docenteResponsableId: 'doc-12',
+    docenteResponsable: 'Lic. Jorge Hernández',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-21',
+    nombre: 'Sofía Valeria Ramírez López',
+    matricula: '2021095',
+    carrera: 'LAF - Licenciatura Administrativa con énfasis en Finanzas',
+    email: 'sofia.ramirez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 40,
+    horasAcumuladas: 40,
+    horasCompletadasPeriodo: 40,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Extensión Universitaria',
+    subarea: 'Coro',
+    docenteResponsableId: 'doc-12',
+    docenteResponsable: 'Lic. Jorge Hernández',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-22',
+    nombre: 'Luis Fernando Sánchez Ramírez',
+    matricula: '2021100',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    email: 'luis.sanchez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 55,
+    horasAcumuladas: 55,
+    horasCompletadasPeriodo: 55,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    docenteResponsableId: 'doc-13',
+    docenteResponsable: 'Mtro. Eduardo Reyes',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Diseño Mecatrónico'
+  },
+  {
+    id: 'est-23',
+    nombre: 'María Guadalupe Hernández López',
+    matricula: '2021105',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    email: 'maria.hernandez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 45,
+    horasAcumuladas: 45,
+    horasCompletadasPeriodo: 45,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    docenteResponsableId: 'doc-13',
+    docenteResponsable: 'Mtro. Eduardo Reyes',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Circuitos Eléctricos III'
+  },
+  {
+    id: 'est-24',
+    nombre: 'Carlos Eduardo Ramírez López',
+    matricula: '2021110',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    email: 'carlos.ramirez@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 50,
+    horasAcumuladas: 50,
+    horasCompletadasPeriodo: 50,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'CIDTEA',
+    subarea: 'Taller y Laboratorio',
+    docenteResponsableId: 'doc-14',
+    docenteResponsable: 'Ing. Sofía Ruiz',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-25',
+    nombre: 'Daniela Patricia Moreno Guzmán',
+    matricula: '2021115',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    email: 'daniela.moreno@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 40,
+    horasAcumuladas: 40,
+    horasCompletadasPeriodo: 40,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'CIDTEA',
+    subarea: 'Taller y Laboratorio',
+    docenteResponsableId: 'doc-14',
+    docenteResponsable: 'Ing. Sofía Ruiz',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-26',
+    nombre: 'Roberto Enrique Torres Castro',
+    matricula: '2021120',
+    carrera: 'LCM - Licenciatura Comercial con Énfasis en Mercadeo',
+    email: 'roberto.torres@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 50,
+    horasAcumuladas: 50,
+    horasCompletadasPeriodo: 50,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Extensión Universitaria',
+    subarea: 'Misioneros',
+    docenteResponsableId: 'doc-15',
+    docenteResponsable: 'Prof. Andrés Medina',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-27',
+    nombre: 'Alejandra Isabel Flores Vargas',
+    matricula: '2021125',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    email: 'alejandra.flores@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 55,
+    horasAcumuladas: 55,
+    horasCompletadasPeriodo: 55,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    docenteResponsableId: 'doc-16',
+    docenteResponsable: 'Dra. Carmen Delgado',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Instrumentación Biomédica'
+  },
+  {
+    id: 'est-28',
+    nombre: 'Miguel Ángel Delgado Núñez',
+    matricula: '2021130',
+    carrera: 'IEM - Ingeniería Electromédica',
+    email: 'miguel.delgado@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 45,
+    horasAcumuladas: 45,
+    horasCompletadasPeriodo: 45,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    docenteResponsableId: 'doc-16',
+    docenteResponsable: 'Dra. Carmen Delgado',
+    cuatrimestre: 'ENE-ABR 2026',
+    cursoAsignado: 'Electrónica de Potencia'
+  },
+  {
+    id: 'est-29',
+    nombre: 'Fernanda Carolina Ortega Silva',
+    matricula: '2021135',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    email: 'fernanda.ortega@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 55,
+    horasAcumuladas: 55,
+    horasCompletadasPeriodo: 55,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'CIDTEA',
+    subarea: 'Proyectos de Investigación Ambiental',
+    docenteResponsableId: 'doc-17',
+    docenteResponsable: 'Mtro. Pablo Jiménez',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-30',
+    nombre: 'Andrés Felipe Medina Rojas',
+    matricula: '2021140',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    email: 'andres.medina@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 45,
+    horasAcumuladas: 45,
+    horasCompletadasPeriodo: 45,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'CIDTEA',
+    subarea: 'Proyectos de Investigación Ambiental',
+    docenteResponsableId: 'doc-17',
+    docenteResponsable: 'Mtro. Pablo Jiménez',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  // Extensión Universitaria - Brigada Ambiental
+  {
+    id: 'est-31',
+    nombre: 'Paola Andrea Mendoza Ríos',
+    matricula: '2021145',
+    carrera: 'IGI - Ingeniería en Gestión Industrial',
+    email: 'paola.mendoza@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 62,
+    horasAcumuladas: 62,
+    horasCompletadasPeriodo: 62,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Extensión Universitaria',
+    subarea: 'Brigada Ambiental',
+    docenteResponsableId: 'doc-18',
+    docenteResponsable: 'Prof. Raúl Espinoza',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-32',
+    nombre: 'Javier Enrique Navarro Cruz',
+    matricula: '2021150',
+    carrera: 'IME - Ingeniería Mecánica y Energías Renovables',
+    email: 'javier.navarro@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 48,
+    horasAcumuladas: 48,
+    horasCompletadasPeriodo: 48,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Extensión Universitaria',
+    subarea: 'Brigada Ambiental',
+    docenteResponsableId: 'doc-18',
+    docenteResponsable: 'Prof. Raúl Espinoza',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  // Brigada Ambiental (área independiente)
+  {
+    id: 'est-33',
+    nombre: 'Camila Beatriz Ruiz Vargas',
+    matricula: '2021155',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    email: 'camila.ruiz@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 88,
+    horasAcumuladas: 88,
+    horasCompletadasPeriodo: 88,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Brigada Ambiental',
+    docenteResponsableId: 'doc-19',
+    docenteResponsable: 'Lic. Mariana Solano',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-34',
+    nombre: 'Emilio Andrés Castro Moreno',
+    matricula: '2021160',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    email: 'emilio.castro@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 72,
+    horasAcumuladas: 72,
+    horasCompletadasPeriodo: 72,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Brigada Ambiental',
+    docenteResponsableId: 'doc-19',
+    docenteResponsable: 'Lic. Mariana Solano',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  // Comunicación Institucional
+  {
+    id: 'est-35',
+    nombre: 'Valentina Isabel Delgado Reyes',
+    matricula: '2021165',
+    carrera: 'LCM - Licenciatura Comercial con Énfasis en Mercadeo',
+    email: 'valentina.delgado@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 95,
+    horasAcumuladas: 95,
+    horasCompletadasPeriodo: 95,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Comunicación Institucional',
+    docenteResponsableId: 'doc-20',
+    docenteResponsable: 'Lic. Héctor Villanueva',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-36',
+    nombre: 'Santiago Felipe Ortega Jiménez',
+    matricula: '2021170',
+    carrera: 'LAF - Licenciatura Administrativa con énfasis en Finanzas',
+    email: 'santiago.ortega@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 60,
+    horasAcumuladas: 60,
+    horasCompletadasPeriodo: 60,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Comunicación Institucional',
+    docenteResponsableId: 'doc-20',
+    docenteResponsable: 'Lic. Héctor Villanueva',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  // Decanatura
+  {
+    id: 'est-37',
+    nombre: 'Isabella Marie Flores Aguilar',
+    matricula: '2021175',
+    carrera: 'LAF - Licenciatura Administrativa con énfasis en Finanzas',
+    email: 'isabella.flores@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 110,
+    horasAcumuladas: 110,
+    horasCompletadasPeriodo: 110,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Decanatura',
+    docenteResponsableId: 'doc-21',
+    docenteResponsable: 'Dra. Lorena Campos',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-38',
+    nombre: 'Mateo Alejandro Guzmán Paredes',
+    matricula: '2021180',
+    carrera: 'IGI - Ingeniería en Gestión Industrial',
+    email: 'mateo.guzman@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 78,
+    horasAcumuladas: 78,
+    horasCompletadasPeriodo: 78,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Decanatura',
+    docenteResponsableId: 'doc-21',
+    docenteResponsable: 'Dra. Lorena Campos',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  // Educación a Distancia
+  {
+    id: 'est-39',
+    nombre: 'Renata Guadalupe Solano Vega',
+    matricula: '2021185',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    email: 'renata.solano@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 85,
+    horasAcumuladas: 85,
+    horasCompletadasPeriodo: 85,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Educación a Distancia',
+    docenteResponsableId: 'doc-22',
+    docenteResponsable: 'Ing. Oscar Paredes',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-40',
+    nombre: 'Sebastián David Herrera Luna',
+    matricula: '2021190',
+    carrera: 'IEM - Ingeniería Electromédica',
+    email: 'sebastian.herrera@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 42,
+    horasAcumuladas: 42,
+    horasCompletadasPeriodo: 42,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Educación a Distancia',
+    docenteResponsableId: 'doc-22',
+    docenteResponsable: 'Ing. Oscar Paredes',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  // Registro Académico
+  {
+    id: 'est-41',
+    nombre: 'Ximena Patricia Campos Torres',
+    matricula: '2021195',
+    carrera: 'LCM - Licenciatura Comercial con Énfasis en Mercadeo',
+    email: 'ximena.campos@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 130,
+    horasAcumuladas: 130,
+    horasCompletadasPeriodo: 130,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Registro Académico',
+    docenteResponsableId: 'doc-23',
+    docenteResponsable: 'Lic. Rosa Elena Fuentes',
+    cuatrimestre: 'ENE-ABR 2026'
+  },
+  {
+    id: 'est-42',
+    nombre: 'Daniel Eduardo Villanueva Espinoza',
+    matricula: '2021200',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    email: 'daniel.villanueva@ulsa.mx',
+    horasRequeridas: 150,
+    horasCompletadas: 55,
+    horasAcumuladas: 55,
+    horasCompletadasPeriodo: 55,
+    periodoActual: 1,
+    estado: 'activo',
+    areaActual: 'Registro Académico',
+    docenteResponsableId: 'doc-23',
+    docenteResponsable: 'Lic. Rosa Elena Fuentes',
+    cuatrimestre: 'ENE-ABR 2026'
+  }
+];
+
+// REGISTROS DE HORAS
+export const mockRegistrosHoras: RegistroHora[] = [
+  // Registros de Juan Carlos Pérez García (est-1) - 55 horas total
+  {
+    id: 'rh-1',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-01-20',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Apoyo en organización de archivos académicos y atención a estudiantes',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-01-22'
+  },
+  {
+    id: 'rh-1b',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-01-25',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Digitalización de documentos académicos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-01-27'
+  },
+  {
+    id: 'rh-1c',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-02-05',
+    horaInicio: '09:00',
+    horaFin: '13:00',
+    totalHoras: 4,
+    descripcion: 'Apoyo en registro de asistencias',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-02-07'
+  },
+  {
+    id: 'rh-1d',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-02-12',
+    horaInicio: '08:00',
+    horaFin: '13:00',
+    totalHoras: 5,
+    descripcion: 'Organización de materiales para reunión de jefatura',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-02-14'
+  },
+  {
+    id: 'rh-1e',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-02-20',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Actualización de base de datos de estudiantes',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-02-22'
+  },
+  {
+    id: 'rh-1f',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-02-27',
+    horaInicio: '09:00',
+    horaFin: '14:00',
+    totalHoras: 5,
+    descripcion: 'Apoyo en preparación de exámenes finales',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-01'
+  },
+  {
+    id: 'rh-1g',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-05',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Atención a estudiantes en trámites académicos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-07'
+  },
+  {
+    id: 'rh-1h',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-10',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Apoyo en organización de eventos académicos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-12'
+  },
+  {
+    id: 'rh-1i',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-13',
+    horaInicio: '08:00',
+    horaFin: '13:00',
+    totalHoras: 5,
+    descripcion: 'Preparación de material didáctico para laboratorios',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-15'
+  },
+  {
+    id: 'rh-1j',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-17',
+    horaInicio: '09:00',
+    horaFin: '14:00',
+    totalHoras: 5,
+    descripcion: 'Apoyo en inventario de equipos de laboratorio',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-18'
+  },
+  {
+    id: 'rh-1k',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-19',
+    horaInicio: '08:00',
+    horaFin: '11:00',
+    totalHoras: 3,
+    descripcion: 'Revisión y actualización de información en sistema',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-19'
+  },
+  {
+    id: 'rh-1l',
+    estudianteId: 'est-1',
+    estudianteNombre: 'Juan Carlos Pérez García',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-18',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Organización de archivo de tesis y proyectos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'pendiente'
+  },
+  
+  // Registros de otros estudiantes
+  {
+    id: 'rh-2',
+    estudianteId: 'est-2',
+    estudianteNombre: 'María Fernanda López Hernández',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-14',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Actualización de base de datos de estudiantes',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'IEM - Ingeniería Electromédica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-16'
+  },
+  {
+    id: 'rh-3',
+    estudianteId: 'est-3',
+    estudianteNombre: 'Carlos Alberto Sánchez Morales',
+    docenteId: 'doc-2',
+    docenteNombre: 'Ing. Patricia Flores',
+    fecha: '2026-03-13',
+    horaInicio: '09:00',
+    horaFin: '13:00',
+    totalHoras: 4,
+    descripcion: 'Preparación de material didáctico para clases',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IME',
+    carrera: 'IME - Ingeniería Mecánica y Energías Renovables',
+    estado: 'aprobada',
+    aprobadoPor: 'Ing. Patricia Flores',
+    fechaAprobacion: '2026-03-15'
+  },
+  {
+    id: 'rh-4',
+    estudianteId: 'est-9',
+    estudianteNombre: 'Jorge Enrique Castillo Mendoza',
+    docenteId: 'doc-6',
+    docenteNombre: 'Lic. Ana Martínez',
+    fecha: '2026-03-12',
+    horaInicio: '10:00',
+    horaFin: '14:00',
+    totalHoras: 4,
+    descripcion: 'Clasificación y organización de libros nuevos',
+    area: 'Biblioteca',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'pendiente'
+  },
+  {
+    id: 'rh-5',
+    estudianteId: 'est-11',
+    estudianteNombre: 'Andrea Valeria Romero Silva',
+    docenteId: 'doc-7',
+    docenteNombre: 'Prof. Miguel Torres',
+    fecha: '2026-03-11',
+    horaInicio: '16:00',
+    horaFin: '20:00',
+    totalHoras: 4,
+    descripcion: 'Ensayo de coreografía para evento institucional',
+    area: 'Bienestar Estudiantil',
+    subarea: 'Danza',
+    carrera: 'LCM - Licenciatura Comercial con Énfasis en Mercadeo',
+    estado: 'pendiente'
+  },
+  
+  // Registros de Luis Alberto López Ramírez (est-16) - 70 horas total
+  {
+    id: 'rh-16a',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-01-22',
+    horaInicio: '09:00',
+    horaFin: '13:00',
+    totalHoras: 4,
+    descripcion: 'Apoyo en organización de documentos académicos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-01-24'
+  },
+  {
+    id: 'rh-16b',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-01-28',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Atención a estudiantes en ventanilla de jefatura',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-01-30'
+  },
+  {
+    id: 'rh-16c',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-02-03',
+    horaInicio: '08:00',
+    horaFin: '13:00',
+    totalHoras: 5,
+    descripcion: 'Digitalización de archivos académicos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-02-05'
+  },
+  {
+    id: 'rh-16d',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-02-10',
+    horaInicio: '09:00',
+    horaFin: '13:00',
+    totalHoras: 4,
+    descripcion: 'Apoyo en preparación de material didáctico',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-02-12'
+  },
+  {
+    id: 'rh-16e',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-02-14',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Organización de eventos académicos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-02-16'
+  },
+  {
+    id: 'rh-16f',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-02-21',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Registro de calificaciones en sistema',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-02-23'
+  },
+  {
+    id: 'rh-16g',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-02-25',
+    horaInicio: '09:00',
+    horaFin: '14:00',
+    totalHoras: 5,
+    descripcion: 'Apoyo en inventario de equipos de laboratorio',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-02-27'
+  },
+  {
+    id: 'rh-16h',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-03',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Actualización de base de datos estudiantil',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-05'
+  },
+  {
+    id: 'rh-16i',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-07',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Preparación de material para reuniones de jefatura',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-09'
+  },
+  {
+    id: 'rh-16j',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-10',
+    horaInicio: '09:00',
+    horaFin: '14:00',
+    totalHoras: 5,
+    descripcion: 'Apoyo en organización de certificaciones estudiantiles',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-12'
+  },
+  {
+    id: 'rh-16k',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-14',
+    horaInicio: '08:00',
+    horaFin: '13:00',
+    totalHoras: 5,
+    descripcion: 'Clasificación y archivo de documentación administrativa',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-16'
+  },
+  {
+    id: 'rh-16l',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-17',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Atención y orientación a estudiantes de nuevo ingreso',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-18'
+  },
+  {
+    id: 'rh-16m',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto M��ndez',
+    fecha: '2026-03-19',
+    horaInicio: '09:00',
+    horaFin: '14:00',
+    totalHoras: 5,
+    descripcion: 'Apoyo en revisión de expedientes académicos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-19'
+  },
+  {
+    id: 'rh-16n',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-18',
+    horaInicio: '08:00',
+    horaFin: '13:00',
+    totalHoras: 5,
+    descripcion: 'Mantenimiento de equipos de laboratorio',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'aprobada',
+    aprobadoPor: 'Dr. Roberto Méndez',
+    fechaAprobacion: '2026-03-19'
+  },
+  {
+    id: 'rh-16o',
+    estudianteId: 'est-16',
+    estudianteNombre: 'Luis Alberto López Ramírez',
+    docenteId: 'doc-1',
+    docenteNombre: 'Dr. Roberto Méndez',
+    fecha: '2026-03-15',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Elaboración de reportes estadísticos de inscripciones',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura ICE/IEM',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    estado: 'pendiente'
+  },
+  
+  // ==================== REGISTROS ADICIONALES PARA SINCRONIZACIÓN ====================
+  // Registros de Ana Patricia Ramírez Torres (est-4) - 68 horas total
+  {
+    id: 'rh-est4-1',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-01-19',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Organización de archivos académicos y atención a estudiantes',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-01-20'
+  },
+  {
+    id: 'rh-est4-2',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-01-21',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Apoyo en registro de asistencias y seguimiento académico',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-01-22'
+  },
+  {
+    id: 'rh-est4-3',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-01-23',
+    horaInicio: '09:00',
+    horaFin: '13:00',
+    totalHoras: 4,
+    descripcion: 'Digitalización de documentos y actualización de base de datos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-01-24'
+  },
+  {
+    id: 'rh-est4-4',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-01-27',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Preparación de material para reunión de jefatura',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-01-28'
+  },
+  {
+    id: 'rh-est4-5',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-01-29',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Atención a estudiantes y resolución de consultas académicas',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-01-30'
+  },
+  {
+    id: 'rh-est4-6',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-03',
+    horaInicio: '09:00',
+    horaFin: '13:00',
+    totalHoras: 4,
+    descripcion: 'Organización de eventos académicos y logística',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-04'
+  },
+  {
+    id: 'rh-est4-7',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-05',
+    horaInicio: '08:00',
+    horaFin: '13:00',
+    totalHoras: 5,
+    descripcion: 'Apoyo en inventario de equipos de laboratorio',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-06'
+  },
+  {
+    id: 'rh-est4-8',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-07',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Actualización de sistema de registro académico',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-08'
+  },
+  {
+    id: 'rh-est4-9',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-10',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Preparación de material didáctico para clases',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-11'
+  },
+  {
+    id: 'rh-est4-10',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-12',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Atención a estudiantes en trámites administrativos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-13'
+  },
+  {
+    id: 'rh-est4-11',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-14',
+    horaInicio: '09:00',
+    horaFin: '13:00',
+    totalHoras: 4,
+    descripcion: 'Organización de archivo de tesis y proyectos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-15'
+  },
+  {
+    id: 'rh-est4-12',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-17',
+    horaInicio: '08:00',
+    horaFin: '13:00',
+    totalHoras: 5,
+    descripcion: 'Apoyo en preparación de exámenes parciales',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-18'
+  },
+  {
+    id: 'rh-est4-13',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-19',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Digitalización y archivo de documentos académicos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-20'
+  },
+  {
+    id: 'rh-est4-14',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-21',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Atención y asesoría a estudiantes de nuevo ingreso',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-22'
+  },
+  {
+    id: 'rh-est4-15',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-24',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Actualización de base de datos estudiantil',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-25'
+  },
+  {
+    id: 'rh-est4-16',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-26',
+    horaInicio: '09:00',
+    horaFin: '13:00',
+    totalHoras: 4,
+    descripcion: 'Organización de materiales para talleres',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-27'
+  },
+  {
+    id: 'rh-est4-17',
+    estudianteId: 'est-4',
+    estudianteNombre: 'Ana Patricia Ramírez Torres',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-28',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Apoyo en control de asistencias y seguimiento',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-03-01'
+  },
+
+  // Registros de Luis Eduardo Martínez Cruz (est-5) - 92 horas total
+  {
+    id: 'rh-est5-1',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-01-19',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Revisión y organización de archivos académicos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-01-20'
+  },
+  {
+    id: 'rh-est5-2',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-01-20',
+    horaInicio: '08:00',
+    horaFin: '13:00',
+    totalHoras: 5,
+    descripcion: 'Atención a estudiantes y gestión de consultas',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-01-21'
+  },
+  {
+    id: 'rh-est5-3',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-01-22',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Digitalización de documentos y actualización de sistemas',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-01-23'
+  },
+  {
+    id: 'rh-est5-4',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-01-26',
+    horaInicio: '09:00',
+    horaFin: '14:00',
+    totalHoras: 5,
+    descripcion: 'Preparación de material para reuniones académicas',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-01-27'
+  },
+  {
+    id: 'rh-est5-5',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-01-28',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Apoyo en control de asistencias y registro académico',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-01-29'
+  },
+  {
+    id: 'rh-est5-6',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-01-30',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Organización de eventos y actividades académicas',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-01-31'
+  },
+  {
+    id: 'rh-est5-7',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-02',
+    horaInicio: '09:00',
+    horaFin: '14:00',
+    totalHoras: 5,
+    descripcion: 'Inventario y mantenimiento de equipos de laboratorio',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-03'
+  },
+  {
+    id: 'rh-est5-8',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-04',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Actualización de base de datos y sistemas académicos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-05'
+  },
+  {
+    id: 'rh-est5-9',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-06',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Preparación de material didáctico y recursos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-07'
+  },
+  {
+    id: 'rh-est5-10',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-09',
+    horaInicio: '09:00',
+    horaFin: '14:00',
+    totalHoras: 5,
+    descripcion: 'Atención a estudiantes en trámites administrativos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-10'
+  },
+  {
+    id: 'rh-est5-11',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-11',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Organización de archivos y documentación',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-12'
+  },
+  {
+    id: 'rh-est5-12',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-13',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Apoyo en preparación de exámenes parciales',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-14'
+  },
+  {
+    id: 'rh-est5-13',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-16',
+    horaInicio: '09:00',
+    horaFin: '14:00',
+    totalHoras: 5,
+    descripcion: 'Digitalización y archivo de proyectos estudiantiles',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-17'
+  },
+  {
+    id: 'rh-est5-14',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-18',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Atención y asesoría a estudiantes',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-19'
+  },
+  {
+    id: 'rh-est5-15',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-20',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Actualización de registros académicos y sistemas',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-21'
+  },
+  {
+    id: 'rh-est5-16',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-23',
+    horaInicio: '09:00',
+    horaFin: '14:00',
+    totalHoras: 5,
+    descripcion: 'Organización de talleres y material de apoyo',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-24'
+  },
+  {
+    id: 'rh-est5-17',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-25',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Apoyo en control de asistencias y seguimiento',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-26'
+  },
+  {
+    id: 'rh-est5-18',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-02-27',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Preparación de informes y documentación académica',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-02-28'
+  },
+  {
+    id: 'rh-est5-19',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-03-02',
+    horaInicio: '09:00',
+    horaFin: '14:00',
+    totalHoras: 5,
+    descripcion: 'Organización de materiales para eventos académicos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-03-03'
+  },
+  {
+    id: 'rh-est5-20',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-03-04',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Atención a estudiantes y gestión administrativa',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-03-05'
+  },
+  {
+    id: 'rh-est5-21',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-03-06',
+    horaInicio: '14:00',
+    horaFin: '18:00',
+    totalHoras: 4,
+    descripcion: 'Digitalización de documentos y actualización de sistemas',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-03-07'
+  },
+  {
+    id: 'rh-est5-22',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-03-09',
+    horaInicio: '09:00',
+    horaFin: '13:00',
+    totalHoras: 4,
+    descripcion: 'Apoyo en preparación de materiales didácticos',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-03-10'
+  },
+  {
+    id: 'rh-est5-23',
+    estudianteId: 'est-5',
+    estudianteNombre: 'Luis Eduardo Martínez Cruz',
+    docenteId: 'doc-3',
+    docenteNombre: 'Mtro. Fernando Silva',
+    fecha: '2026-03-11',
+    horaInicio: '08:00',
+    horaFin: '12:00',
+    totalHoras: 4,
+    descripcion: 'Revisión final de archivos y documentación',
+    area: 'Asistencia Docente',
+    subarea: 'Jefatura IMS/IEL',
+    carrera: 'IEL - Ingeniería Eléctrica',
+    estado: 'aprobada',
+    aprobadoPor: 'Mtro. Fernando Silva',
+    fechaAprobacion: '2026-03-12'
+  }
+];
+
+// ASIGNACIONES
+export const mockAsignaciones: Asignacion[] = mockEstudiantes.map(est => ({
+  id: `asig-${est.id}`,
+  estudianteId: est.id,
+  estudianteNombre: est.nombre,
+  area: est.areaActual || '',
+  subarea: est.subarea,
+  responsable: est.docenteResponsable || '',
+  docenteResponsable: est.docenteResponsable,
+  cuatrimestre: est.cuatrimestre,
+  fechaInicio: '2026-01-15',
+  estado: 'activa' as const
+}));
+
+// Usuarios del sistema para login
+export const mockUsers: { [email: string]: any } = {
+  'admin@ulsa.mx': {
+    email: 'admin@ulsa.mx',
+    password: '123456',
+    name: 'Administrador Bienestar',
+    role: 'admin'
+  },
+  'jefatura@ulsa.mx': {
+    email: 'jefatura@ulsa.mx',
+    password: '123456',
+    name: 'Jefatura IMS/IEL',
+    role: 'jefatura',
+    carrera: 'IMS - Ingeniería Mecatrónica y Sistemas de Control',
+    jefatura: 'IMS/IEL',
+    carrerasAsignadas: ['IMS - Ingeniería Mecatrónica y Sistemas de Control', 'IEL - Ingeniería Eléctrica']
+  },
+  'jefatura.ice@ulsa.mx': {
+    email: 'jefatura.ice@ulsa.mx',
+    password: '123456',
+    name: 'Jefatura ICE/IEM',
+    role: 'jefatura',
+    carrera: 'ICE - Ingeniería en Cibernética Electrónica',
+    jefatura: 'ICE/IEM',
+    carrerasAsignadas: ['ICE - Ingeniería en Cibernética Electrónica', 'IEM - Ingeniería Electromédica']
+  },
+  'docente@ulsa.mx': {
+    email: 'docente@ulsa.mx',
+    password: '123456',
+    name: 'Dr. Roberto Méndez',
+    role: 'docente',
+    docenteId: 'doc-1'
+  },
+  'roberto.mendez@ulsa.mx': {
+    email: 'roberto.mendez@ulsa.mx',
+    password: '123456',
+    name: 'Dr. Roberto Méndez',
+    role: 'docente',
+    docenteId: 'doc-1'
+  },
+  'estudiante@ulsa.mx': {
+    email: 'estudiante@ulsa.mx',
+    password: '123456',
+    name: 'Juan Carlos Pérez García',
+    role: 'estudiante',
+    estudianteId: 'est-1'
+  },
+  'juan.perez@ulsa.mx': {
+    email: 'juan.perez@ulsa.mx',
+    password: '123456',
+    name: 'Juan Carlos Pérez García',
+    role: 'estudiante',
+    estudianteId: 'est-1'
+  }
+};
+
+// ========== FUNCIÓN PARA GENERAR REGISTROS FALTANTES ==========
+// Genera registros de horas para estudiantes que tienen horasCompletadas pero no registros suficientes
+function generarRegistrosFaltantes() {
+  const registrosGenerados: RegistroHora[] = [];
+  const fechasBase = [
+    '2026-01-19', '2026-01-20', '2026-01-21', '2026-01-22', '2026-01-23',
+    '2026-01-26', '2026-01-27', '2026-01-28', '2026-01-29', '2026-01-30',
+    '2026-02-02', '2026-02-03', '2026-02-04', '2026-02-05', '2026-02-06',
+    '2026-02-09', '2026-02-10', '2026-02-11', '2026-02-12', '2026-02-13',
+    '2026-02-16', '2026-02-17', '2026-02-18', '2026-02-19', '2026-02-20',
+    '2026-02-23', '2026-02-24', '2026-02-25', '2026-02-26', '2026-02-27',
+    '2026-03-02', '2026-03-03', '2026-03-04', '2026-03-05', '2026-03-06',
+    '2026-03-09', '2026-03-10', '2026-03-11', '2026-03-12', '2026-03-13'
+  ];
+
+  const actividadesTipo = [
+    'Organización de archivos académicos y atención a estudiantes',
+    'Apoyo en registro de asistencias y seguimiento académico',
+    'Digitalización de documentos y actualización de base de datos',
+    'Preparación de material para reuniones académicas',
+    'Atención a estudiantes y gestión de consultas',
+    'Actualización de sistemas y bases de datos',
+    'Apoyo en control de asistencias',
+    'Organización de eventos y actividades',
+    'Preparación de material didáctico',
+    'Inventario y mantenimiento de equipos',
+    'Atención en trámites administrativos',
+    'Archivo y documentación académica',
+    'Apoyo en preparación de exámenes',
+    'Asesoría a estudiantes'
+  ];
+
+  // IDs de estudiantes que YA tienen registros completos
+  const estudiantesConRegistros = new Set(['est-1', 'est-4', 'est-5', 'est-16']);
+
+  // Contador global para IDs únicos
+  let contadorGlobal = 1000;
+
+  mockEstudiantes.forEach(estudiante => {
+    if (estudiantesConRegistros.has(estudiante.id) || estudiante.horasCompletadas === 0) {
+      return; // Saltar estudiantes que ya tienen registros o no tienen horas
+    }
+
+    let horasGeneradas = 0;
+    let fechaIndex = 0;
+    let registroCount = 0;
+
+    while (horasGeneradas < estudiante.horasCompletadas && fechaIndex < fechasBase.length) {
+      const horasRegistro = Math.min(4, estudiante.horasCompletadas - horasGeneradas);
+      
+      registrosGenerados.push({
+        id: `rh-auto-${contadorGlobal++}`,
+        estudianteId: estudiante.id,
+        estudianteNombre: estudiante.nombre,
+        docenteId: estudiante.docenteResponsableId || 'doc-1',
+        docenteNombre: estudiante.docenteResponsable || 'Docente Responsable',
+        fecha: fechasBase[fechaIndex],
+        horaInicio: fechaIndex % 2 === 0 ? '08:00' : '14:00',
+        horaFin: fechaIndex % 2 === 0 ? (horasRegistro === 4 ? '12:00' : '13:00') : (horasRegistro === 4 ? '18:00' : '19:00'),
+        totalHoras: horasRegistro,
+        descripcion: actividadesTipo[registroCount % actividadesTipo.length],
+        area: estudiante.areaActual || 'Asistencia Docente',
+        subarea: estudiante.subarea,
+        carrera: estudiante.carrera,
+        estado: 'aprobada',
+        aprobadoPor: estudiante.docenteResponsable || 'Docente Responsable',
+        fechaAprobacion: fechasBase[Math.min(fechaIndex + 1, fechasBase.length - 1)]
+      });
+
+      horasGeneradas += horasRegistro;
+      fechaIndex++;
+      registroCount++;
+    }
+  });
+
+  return registrosGenerados;
+}
+
+// Agregar registros generados al array principal
+const registrosGenerados = generarRegistrosFaltantes();
+mockRegistrosHoras.push(...registrosGenerados);
+
+// ========== TIPOS Y DATOS DE MENSAJERÍA ==========
+
+export interface Mensaje {
+  id: string;
+  conversacionId: string;
+  remitenteId: string;
+  remitenteNombre: string;
+  contenido: string;
+  fecha: string;
+  hora: string;
+  leido: boolean;
+}
+
+export interface Conversacion {
+  id: string;
+  nombre: string;
+  tipo: 'individual' | 'grupo';
+  participantes: string[];
+  ultimoMensaje: string;
+  mensajesNoLeidos: number;
+}
+
+export interface Grupo {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  miembros: string[];
+  creadoPor: string;
+}
+
+export const mockConversaciones: Conversacion[] = [
+  {
+    id: 'conv-1',
+    nombre: 'Juan Carlos Pérez García',
+    tipo: 'individual',
+    participantes: ['doc-1', 'est-1'],
+    ultimoMensaje: 'Gracias profesor, ya completé las horas de esta semana.',
+    mensajesNoLeidos: 1
+  },
+  {
+    id: 'conv-2',
+    nombre: 'María Fernanda López Ruiz',
+    tipo: 'individual',
+    participantes: ['doc-1', 'est-2'],
+    ultimoMensaje: 'Profesor, ¿puedo cambiar mi horario del jueves?',
+    mensajesNoLeidos: 2
+  },
+  {
+    id: 'conv-3',
+    nombre: 'Diego Alejandro Torres Vega',
+    tipo: 'individual',
+    participantes: ['doc-1', 'est-16'],
+    ultimoMensaje: 'Entendido, estaré puntual mañana.',
+    mensajesNoLeidos: 0
+  },
+  {
+    id: 'conv-4',
+    nombre: 'Grupo - Asistencia Docente',
+    tipo: 'grupo',
+    participantes: ['doc-1', 'est-1', 'est-2', 'est-16'],
+    ultimoMensaje: 'Recuerden registrar sus horas antes del viernes.',
+    mensajesNoLeidos: 0
+  }
+];
+
+export const mockMensajes: Mensaje[] = [
+  {
+    id: 'msg-1',
+    conversacionId: 'conv-1',
+    remitenteId: 'doc-1',
+    remitenteNombre: 'Dr. Roberto Méndez',
+    contenido: 'Hola Juan Carlos, ¿cómo vas con tus horas de esta semana?',
+    fecha: '2026-04-06',
+    hora: '09:15',
+    leido: true
+  },
+  {
+    id: 'msg-2',
+    conversacionId: 'conv-1',
+    remitenteId: 'est-1',
+    remitenteNombre: 'Juan Carlos Pérez García',
+    contenido: 'Buenos días profesor. Ya llevo 3 horas registradas, me faltan 2 para completar la semana.',
+    fecha: '2026-04-06',
+    hora: '09:30',
+    leido: true
+  },
+  {
+    id: 'msg-3',
+    conversacionId: 'conv-1',
+    remitenteId: 'doc-1',
+    remitenteNombre: 'Dr. Roberto Méndez',
+    contenido: 'Muy bien, recuerda registrarlas antes del viernes.',
+    fecha: '2026-04-06',
+    hora: '09:35',
+    leido: true
+  },
+  {
+    id: 'msg-4',
+    conversacionId: 'conv-1',
+    remitenteId: 'est-1',
+    remitenteNombre: 'Juan Carlos Pérez García',
+    contenido: 'Gracias profesor, ya completé las horas de esta semana.',
+    fecha: '2026-04-07',
+    hora: '16:20',
+    leido: false
+  },
+  {
+    id: 'msg-5',
+    conversacionId: 'conv-2',
+    remitenteId: 'est-2',
+    remitenteNombre: 'María Fernanda López Ruiz',
+    contenido: 'Profesor, ¿puedo cambiar mi horario del jueves? Tengo un examen a esa hora.',
+    fecha: '2026-04-07',
+    hora: '10:00',
+    leido: false
+  },
+  {
+    id: 'msg-6',
+    conversacionId: 'conv-2',
+    remitenteId: 'est-2',
+    remitenteNombre: 'María Fernanda López Ruiz',
+    contenido: 'Podría asistir el viernes en su lugar.',
+    fecha: '2026-04-07',
+    hora: '10:01',
+    leido: false
+  },
+  {
+    id: 'msg-7',
+    conversacionId: 'conv-3',
+    remitenteId: 'doc-1',
+    remitenteNombre: 'Dr. Roberto Méndez',
+    contenido: 'Diego, mañana necesito que llegues a las 8:00 para apoyar con el inventario del laboratorio.',
+    fecha: '2026-04-07',
+    hora: '14:00',
+    leido: true
+  },
+  {
+    id: 'msg-8',
+    conversacionId: 'conv-3',
+    remitenteId: 'est-16',
+    remitenteNombre: 'Diego Alejandro Torres Vega',
+    contenido: 'Entendido, estaré puntual mañana.',
+    fecha: '2026-04-07',
+    hora: '14:15',
+    leido: true
+  },
+  {
+    id: 'msg-9',
+    conversacionId: 'conv-4',
+    remitenteId: 'doc-1',
+    remitenteNombre: 'Dr. Roberto Méndez',
+    contenido: 'Recuerden registrar sus horas antes del viernes.',
+    fecha: '2026-04-06',
+    hora: '08:00',
+    leido: true
+  }
+];
+
+export const mockGrupos: Grupo[] = [
+  {
+    id: 'grupo-1',
+    nombre: 'Grupo - Asistencia Docente',
+    descripcion: 'Grupo general de estudiantes asignados al Dr. Roberto Méndez',
+    miembros: ['est-1', 'est-2', 'est-16'],
+    creadoPor: 'doc-1'
+  }
+];
