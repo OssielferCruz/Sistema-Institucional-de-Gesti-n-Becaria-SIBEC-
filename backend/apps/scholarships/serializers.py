@@ -59,3 +59,7 @@ class AssignmentSerializer(serializers.ModelSerializer):
         model = Assignment
         fields = ['id', 'student', 'student_id', 'subarea', 'subarea_id', 'teacher_profile', 'teacher_profile_id', 'term', 'term_id', 'assigned_at', 'end_at', 'status', 'notes', 'created_at', 'updated_at']
         read_only_fields = ['id', 'assigned_at', 'created_at', 'updated_at']
+
+
+class StudentImportSerializer(serializers.Serializer):
+    file = serializers.FileField()

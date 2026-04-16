@@ -1,0 +1,4 @@
+student_code,first_name,last_name,email,career_code,study_plan_code,admission_year,required_annual_hours
+ULSA-001,Juan,Carlos,juan.carlos@example.com,ice,cuatri,2026,150
+ULSA-002,Maria,Fernanda,maria.fernanda@example.com,iem,cuatri,2026,150
+ULSA-003,Diego,Jimenez,diego.jimenez@example.com,igi,trim,2026,150
