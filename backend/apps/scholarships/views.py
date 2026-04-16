@@ -1,14 +1,34 @@
-from rest_framework import viewsets
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
+from apps.common.permissions import IsAdminRole
 from apps.scholarships.models import Assignment, DepartmentHeadProfile, Student, TeacherProfile
-from apps.scholarships.serializers import AssignmentSerializer, DepartmentHeadProfileSerializer, StudentSerializer, TeacherProfileSerializer
+from apps.scholarships.serializers import (
+    AssignmentSerializer,
+    DepartmentHeadProfileSerializer,
+    StudentImportSerializer,
+    StudentSerializer,
+    TeacherProfileSerializer,
+)
+from apps.scholarships.services import import_students_from_csv
 
 
 class StudentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Student.objects.select_related('user', 'career', 'study_plan').all()
     serializer_class = StudentSerializer
     permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated, IsAdminRole])
+    def import_csv(self, request):
+        serializer = StudentImportSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = import_students_from_csv(serializer.validated_data['file'])
+        status_code = status.HTTP_201_CREATED if not result['errors'] else status.HTTP_207_MULTI_STATUS
+        return Response(result, status=status_code)
 
 
 class TeacherProfileViewSet(viewsets.ReadOnlyModelViewSet):
@@ -27,6 +47,3 @@ class AssignmentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Assignment.objects.select_related('student', 'subarea', 'teacher_profile', 'term').all()
     serializer_class = AssignmentSerializer
     permission_classes = [IsAuthenticated]
-from django.shortcuts import render
-
-# Create your views here.
