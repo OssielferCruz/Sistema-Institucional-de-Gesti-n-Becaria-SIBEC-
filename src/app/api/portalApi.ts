@@ -320,6 +320,10 @@ export async function fetchStudentAssignments(): Promise<AssignmentApiResponse[]
   return fetchAllPages<AssignmentApiResponse>('/api/v1/assignments/');
 }
 
+export async function fetchAssignments(): Promise<AssignmentApiResponse[]> {
+  return fetchStudentAssignments();
+}
+
 export async function fetchStudentHoursLogs(): Promise<HoursLogApiResponse[]> {
   return fetchAllPages<HoursLogApiResponse>('/api/v1/hours-logs/');
 }
