@@ -1,8 +1,10 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from apps.approvals.views import HoursReviewViewSet
 from apps.accounts.views import MeViewSet, RoleViewSet, UserViewSet
 from apps.academic.views import CareerViewSet, StudyPlanViewSet, TermViewSet
+from apps.hours.views import HoursEvidenceViewSet, HoursLogViewSet, HoursPolicySegmentViewSet, HoursPolicyViewSet, ProgressViewSet
 from apps.organization.views import AreaViewSet, SubareaViewSet
 from apps.scholarships.views import AssignmentViewSet, DepartmentHeadProfileViewSet, StudentViewSet, TeacherProfileViewSet
 
@@ -18,6 +20,12 @@ router.register(r'students', StudentViewSet, basename='student')
 router.register(r'teachers', TeacherProfileViewSet, basename='teacher')
 router.register(r'department-heads', DepartmentHeadProfileViewSet, basename='departmenthead')
 router.register(r'assignments', AssignmentViewSet, basename='assignment')
+router.register(r'hours-policies', HoursPolicyViewSet, basename='hourspolicy')
+router.register(r'hours-policy-segments', HoursPolicySegmentViewSet, basename='hourspolicysegment')
+router.register(r'hours-logs', HoursLogViewSet, basename='hourslog')
+router.register(r'hours-evidences', HoursEvidenceViewSet, basename='hoursevidence')
+router.register(r'hours-reviews', HoursReviewViewSet, basename='hoursreview')
+router.register(r'progress', ProgressViewSet, basename='progress')
 
 urlpatterns = [
 	path('', include(router.urls)),
