@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Outlet } from 'react-router';
-import { refreshToken, requestCurrentUser, requestToken } from '../api/authApi';
+import { mockUsers } from '../data/mockData';
 
 export type UserRole = 'admin' | 'jefatura' | 'docente' | 'estudiante';
 
@@ -22,73 +22,16 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
-  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_USER_KEY = 'sibec_user';
-const STORAGE_ACCESS_TOKEN_KEY = 'sibec_access_token';
-const STORAGE_REFRESH_TOKEN_KEY = 'sibec_refresh_token';
-
-function readFromStorage(key: string): string | null {
-  try {
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      return sessionStorage.getItem(key);
-    }
-  } catch (error) {
-    console.error(`Error reading storage key ${key}:`, error);
-  }
-  return null;
-}
-
-function writeToStorage(key: string, value: string): void {
-  try {
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      sessionStorage.setItem(key, value);
-    }
-  } catch (error) {
-    console.error(`Error writing storage key ${key}:`, error);
-  }
-}
-
-function removeFromStorage(key: string): void {
-  try {
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      sessionStorage.removeItem(key);
-    }
-  } catch (error) {
-    console.error(`Error removing storage key ${key}:`, error);
-  }
-}
-
-function mapRole(roleCode?: string | null): UserRole {
-  if (roleCode === 'admin' || roleCode === 'jefatura' || roleCode === 'docente' || roleCode === 'estudiante') {
-    return roleCode;
-  }
-  return 'estudiante';
-}
-
-function mapApiUserToAuthUser(apiUser: {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  role: { code: string } | null;
-}): User {
-  return {
-    id: apiUser.id,
-    name: `${apiUser.first_name} ${apiUser.last_name}`.trim(),
-    email: apiUser.email,
-    role: mapRole(apiUser.role?.code),
-  };
-}
-
 export const AuthProvider: React.FC<{ children?: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
+    // Initialize from sessionStorage if available
     try {
       if (typeof window !== 'undefined' && window.sessionStorage) {
-        const stored = sessionStorage.getItem(STORAGE_USER_KEY);
+        const stored = sessionStorage.getItem('sibec_user');
         return stored ? JSON.parse(stored) : null;
       }
     } catch (error) {
@@ -96,65 +39,40 @@ export const AuthProvider: React.FC<{ children?: ReactNode }> = ({ children }) =
     }
     return null;
   });
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const persistSession = (nextUser: User, access: string, refresh: string) => {
-    setUser(nextUser);
-    writeToStorage(STORAGE_USER_KEY, JSON.stringify(nextUser));
-    writeToStorage(STORAGE_ACCESS_TOKEN_KEY, access);
-    writeToStorage(STORAGE_REFRESH_TOKEN_KEY, refresh);
-  };
-
-  const clearSession = () => {
-    setUser(null);
-    removeFromStorage(STORAGE_USER_KEY);
-    removeFromStorage(STORAGE_ACCESS_TOKEN_KEY);
-    removeFromStorage(STORAGE_REFRESH_TOKEN_KEY);
-  };
-
-  useEffect(() => {
-    const bootstrapSession = async () => {
-      const access = readFromStorage(STORAGE_ACCESS_TOKEN_KEY);
-      const refresh = readFromStorage(STORAGE_REFRESH_TOKEN_KEY);
-
-      if (!access || !refresh) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const apiUser = await requestCurrentUser(access);
-        const mappedUser = mapApiUserToAuthUser(apiUser);
-        setUser(mappedUser);
-        writeToStorage(STORAGE_USER_KEY, JSON.stringify(mappedUser));
-      } catch {
-        try {
-          const tokenPayload = await refreshToken(refresh);
-          const apiUser = await requestCurrentUser(tokenPayload.access);
-          const mappedUser = mapApiUserToAuthUser(apiUser);
-          setUser(mappedUser);
-          writeToStorage(STORAGE_USER_KEY, JSON.stringify(mappedUser));
-          writeToStorage(STORAGE_ACCESS_TOKEN_KEY, tokenPayload.access);
-        } catch {
-          clearSession();
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    bootstrapSession();
-  }, []);
 
   const login = async (email: string, password: string) => {
-    const tokenPair = await requestToken(email, password);
-    const apiUser = await requestCurrentUser(tokenPair.access);
-    const mappedUser = mapApiUserToAuthUser(apiUser);
-    persistSession(mappedUser, tokenPair.access, tokenPair.refresh);
+    // Simulación de login (delay reducido para mejor UX)
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const foundUserData = mockUsers[email];
+    if (foundUserData && foundUserData.password === password) {
+      // Crear objeto de usuario sin el password
+      const { password: _, ...userWithoutPassword } = foundUserData;
+
+      setUser(userWithoutPassword as User);
+
+      // Guardar en sessionStorage si está disponible
+      try {
+        if (typeof window !== 'undefined' && window.sessionStorage) {
+          sessionStorage.setItem('sibec_user', JSON.stringify(userWithoutPassword));
+        }
+      } catch (error) {
+        console.error('Error saving user to sessionStorage:', error);
+      }
+    } else {
+      throw new Error('Credenciales inválidas');
+    }
   };
 
   const logout = () => {
-    clearSession();
+    setUser(null);
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.removeItem('sibec_user');
+      }
+    } catch (error) {
+      console.error('Error removing user from sessionStorage:', error);
+    }
   };
 
   return (
@@ -163,8 +81,7 @@ export const AuthProvider: React.FC<{ children?: ReactNode }> = ({ children }) =
         user, 
         login, 
         logout, 
-        isAuthenticated: !!user,
-        isLoading,
+        isAuthenticated: !!user 
       }}
     >
       {children ?? <Outlet />}
