@@ -1,5 +1,7 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000';
 const ACCESS_TOKEN_KEY = 'sibec_access_token';
+const REFRESH_TOKEN_KEY = 'sibec_refresh_token';
+const USER_KEY = 'sibec_user';
 
 export interface ApiRole {
   id: string;
@@ -204,29 +206,130 @@ function getAccessToken(): string | null {
   }
 }
 
-async function authRequest<T>(path: string): Promise<T> {
+function getRefreshToken(): string | null {
+  try {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+
+    return sessionStorage.getItem(REFRESH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function setAccessToken(token: string): void {
+  try {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
+    }
+  } catch {
+    // Ignore storage write errors.
+  }
+}
+
+function clearSession(): void {
+  try {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+      sessionStorage.removeItem(REFRESH_TOKEN_KEY);
+      sessionStorage.removeItem(USER_KEY);
+    }
+  } catch {
+    // Ignore storage cleanup errors.
+  }
+}
+
+async function parseErrorDetail(response: Response, fallback: string): Promise<string> {
+  let detail = fallback;
+
+  try {
+    const payload = await response.json();
+    if (payload?.detail) {
+      detail = payload.detail;
+    }
+    if (payload?.non_field_errors?.[0]) {
+      detail = payload.non_field_errors[0];
+    }
+  } catch {
+    // Ignore parsing failures.
+  }
+
+  return detail;
+}
+
+async function refreshAccessToken(): Promise<string | null> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    return null;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/v1/auth/token/refresh/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ refresh: refreshToken }),
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  try {
+    const payload = await response.json() as { access?: string };
+    if (!payload.access) {
+      return null;
+    }
+    setAccessToken(payload.access);
+    return payload.access;
+  } catch {
+    return null;
+  }
+}
+
+function withAuth(init: RequestInit, token: string): RequestInit {
+  const headers = new Headers(init.headers);
+  headers.set('Authorization', `Bearer ${token}`);
+  return {
+    ...init,
+    headers,
+  };
+}
+
+async function fetchWithAuth(path: string, init: RequestInit): Promise<Response> {
   const accessToken = getAccessToken();
   if (!accessToken) {
     throw new Error('No hay una sesión activa.');
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+  let response = await fetch(`${API_BASE_URL}${path}`, withAuth(init, accessToken));
+  if (response.status !== 401) {
+    return response;
+  }
+
+  const refreshedToken = await refreshAccessToken();
+  if (!refreshedToken) {
+    clearSession();
+    throw new Error('Sesión expirada. Inicia sesión nuevamente.');
+  }
+
+  response = await fetch(`${API_BASE_URL}${path}`, withAuth(init, refreshedToken));
+  if (response.status === 401) {
+    clearSession();
+    throw new Error('Sesión expirada. Inicia sesión nuevamente.');
+  }
+
+  return response;
+}
+
+async function authRequest<T>(path: string): Promise<T> {
+  const response = await fetchWithAuth(path, {
+    method: 'GET',
   });
 
   if (!response.ok) {
-    let detail = 'No fue posible consultar el backend.';
-    try {
-      const payload = await response.json();
-      if (payload?.detail) {
-        detail = payload.detail;
-      }
-    } catch {
-      // Ignore parsing failures.
-    }
-
+    const detail = await parseErrorDetail(response, 'No fue posible consultar el backend.');
     throw new Error(detail);
   }
 
@@ -258,34 +361,16 @@ async function fetchAllPages<T>(path: string): Promise<T[]> {
 }
 
 async function authMutation<T>(path: string, method: 'POST' | 'PATCH', body?: unknown): Promise<T> {
-  const accessToken = getAccessToken();
-  if (!accessToken) {
-    throw new Error('No hay una sesión activa.');
-  }
-
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetchWithAuth(path, {
     method,
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 
   if (!response.ok) {
-    let detail = 'No fue posible actualizar la información.';
-    try {
-      const payload = await response.json();
-      if (payload?.detail) {
-        detail = payload.detail;
-      }
-      if (payload?.non_field_errors?.[0]) {
-        detail = payload.non_field_errors[0];
-      }
-    } catch {
-      // Ignore parsing failures.
-    }
-
+    const detail = await parseErrorDetail(response, 'No fue posible actualizar la información.');
     throw new Error(detail);
   }
 
@@ -328,7 +413,7 @@ export async function fetchStudentHoursLogs(): Promise<HoursLogApiResponse[]> {
   return fetchAllPages<HoursLogApiResponse>('/api/v1/hours-logs/');
 }
 
-export async function approveHoursLog(hoursLogId: string, comments: string): Promise<HoursLogApiResponse> {
+export async function approveHoursLog(hoursLogId: string, comments = ''): Promise<HoursLogApiResponse> {
   return authMutation<HoursLogApiResponse>(`/api/v1/hours-logs/${hoursLogId}/approve/`, 'POST', { comments });
 }
 

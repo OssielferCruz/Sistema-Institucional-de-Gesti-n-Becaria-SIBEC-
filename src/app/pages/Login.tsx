@@ -32,14 +32,15 @@ export default function Login() {
         navigate('/dashboard');
       })
       .catch((error) => {
-        toast.error('Credenciales inválidas. Intenta con admin@ulsa.mx / 123456');
-        setError('Credenciales inválidas. Intenta con admin@ulsa.mx / 123456');
+        const message = error instanceof Error ? error.message : 'Credenciales inválidas';
+        toast.error(message);
+        setError(message);
       });
   };
 
   const quickLogin = (userEmail: string) => {
     setEmail(userEmail);
-    setPassword('123456');
+    setPassword('Admin123456!');
   };
 
   return (
@@ -107,7 +108,7 @@ export default function Login() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('admin@ulsa.mx')}
+                  onClick={() => quickLogin('admin@sibec.local')}
                   className="text-xs"
                 >
                   Admin
@@ -115,7 +116,7 @@ export default function Login() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('jefatura@ulsa.mx')}
+                  onClick={() => quickLogin('jefatura@sibec.local')}
                   className="text-xs"
                 >
                   Jefatura
@@ -123,7 +124,7 @@ export default function Login() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('docente@ulsa.mx')}
+                  onClick={() => quickLogin('docente@sibec.local')}
                   className="text-xs"
                 >
                   Docente
@@ -131,14 +132,14 @@ export default function Login() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('estudiante@ulsa.mx')}
+                  onClick={() => quickLogin('estudiante@sibec.local')}
                   className="text-xs"
                 >
                   Estudiante
                 </Button>
               </div>
               <p className="text-xs text-gray-400 mt-2 text-center">
-                Contraseña: 123456
+                Contraseña demo backend: Admin123456!
               </p>
             </div>
           </CardContent>
