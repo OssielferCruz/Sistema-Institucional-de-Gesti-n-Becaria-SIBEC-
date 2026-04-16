@@ -1,6 +1,100 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000';
 const ACCESS_TOKEN_KEY = 'sibec_access_token';
 
+export interface ApiRole {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ApiUserSummary {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: ApiRole | null;
+  is_active: boolean;
+}
+
+export interface CareerApiResponse {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  degree_level: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudyPlanApiResponse {
+  id: string;
+  code: string;
+  name: string;
+  period_type: string;
+  periods_per_year: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AreaApiResponse {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubareaApiResponse {
+  id: string;
+  area: AreaApiResponse;
+  code: string;
+  name: string;
+  description: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudentProfileApiResponse {
+  id: string;
+  user: ApiUserSummary;
+  student_code: string;
+  career: CareerApiResponse;
+  study_plan: StudyPlanApiResponse;
+  admission_year: number;
+  scholarship_status: string;
+  required_annual_hours: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TeacherProfileApiResponse {
+  id: string;
+  user: ApiUserSummary;
+  employee_code: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DepartmentHeadProfileApiResponse {
+  id: string;
+  user: ApiUserSummary;
+  career: CareerApiResponse;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface StudentProgressApiResponse {
   student_id: string;
   student_code: string;
@@ -200,6 +294,26 @@ async function authMutation<T>(path: string, method: 'POST' | 'PATCH', body?: un
 
 export async function fetchStudentProgress(): Promise<StudentProgressApiResponse> {
   return authRequest<StudentProgressApiResponse>('/api/v1/progress/me/');
+}
+
+export async function fetchStudents(): Promise<StudentProfileApiResponse[]> {
+  return fetchAllPages<StudentProfileApiResponse>('/api/v1/students/');
+}
+
+export async function fetchTeachers(): Promise<TeacherProfileApiResponse[]> {
+  return fetchAllPages<TeacherProfileApiResponse>('/api/v1/teachers/');
+}
+
+export async function fetchDepartmentHeads(): Promise<DepartmentHeadProfileApiResponse[]> {
+  return fetchAllPages<DepartmentHeadProfileApiResponse>('/api/v1/department-heads/');
+}
+
+export async function fetchAreas(): Promise<AreaApiResponse[]> {
+  return fetchAllPages<AreaApiResponse>('/api/v1/areas/');
+}
+
+export async function fetchSubareas(): Promise<SubareaApiResponse[]> {
+  return fetchAllPages<SubareaApiResponse>('/api/v1/subareas/');
 }
 
 export async function fetchStudentAssignments(): Promise<AssignmentApiResponse[]> {

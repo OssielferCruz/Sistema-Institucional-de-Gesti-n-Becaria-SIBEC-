@@ -27,6 +27,7 @@ export interface StudentPortalAssignment {
 export interface StudentPortalData {
   progress: StudentProgressApiResponse | null;
   assignment: StudentPortalAssignment | null;
+  assignmentRecord: AssignmentApiResponse | null;
   recentLogs: HoursLogApiResponse[];
   chartData: StudentPortalChartPoint[];
   isLoading: boolean;
@@ -68,6 +69,7 @@ function buildChartData(logs: HoursLogApiResponse[]): StudentPortalChartPoint[] 
 export function useStudentPortalData(): StudentPortalData {
   const [progress, setProgress] = useState<StudentProgressApiResponse | null>(null);
   const [assignment, setAssignment] = useState<StudentPortalAssignment | null>(null);
+  const [assignmentRecord, setAssignmentRecord] = useState<AssignmentApiResponse | null>(null);
   const [recentLogs, setRecentLogs] = useState<HoursLogApiResponse[]>([]);
   const [chartData, setChartData] = useState<StudentPortalChartPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,6 +101,7 @@ export function useStudentPortalData(): StudentPortalData {
 
         setProgress(progressResponse);
         setAssignment(buildAssignment(currentAssignment));
+        setAssignmentRecord(currentAssignment);
         setRecentLogs(sortedLogs.slice(0, 6));
         setChartData(buildChartData(sortedLogs));
       } catch (loadError) {
@@ -124,6 +127,7 @@ export function useStudentPortalData(): StudentPortalData {
   return {
     progress,
     assignment,
+    assignmentRecord,
     recentLogs,
     chartData,
     isLoading,
