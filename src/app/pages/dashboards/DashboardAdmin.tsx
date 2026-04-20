@@ -13,10 +13,12 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 // recharts imports removed from TabResumen — now uses CSSBarChart
-import {
-  Estudiante, Docente, Subarea
-} from '../../data/mockData';
 import { useLegacyDataBridge } from '../../hooks/useLegacyDataBridge';
+
+type BridgeData = ReturnType<typeof useLegacyDataBridge>;
+type Estudiante = BridgeData['mockEstudiantes'][number];
+type Docente = BridgeData['mockDocentes'][number];
+type Subarea = BridgeData['areas'][number]['subareas'][number];
 
 // ─── Color maps ───
 const AREA_COLORS: Record<string, string> = {
