@@ -12,7 +12,7 @@ import {
   type SubareaApiResponse,
   type TeacherProfileApiResponse,
 } from '../api/portalApi';
-import type { Area, Docente, Estudiante, RegistroHora } from '../data/mockData';
+import type { Area, Docente, Estudiante, RegistroHora } from '../types/domain';
 
 export type RegistroHoraExtended = RegistroHora & {
   validadoPorJefatura?: boolean;
