@@ -14,9 +14,9 @@ import { Input } from '../../components/ui/input';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 // recharts imports removed from TabResumen — now uses CSSBarChart
 import {
-  mockEstudiantes, mockDocentes, mockRegistrosHoras, areas, carreras,
   Estudiante, Docente, Subarea
 } from '../../data/mockData';
+import { useLegacyDataBridge } from '../../hooks/useLegacyDataBridge';
 
 // ─── Color maps ───
 const AREA_COLORS: Record<string, string> = {
@@ -49,6 +49,12 @@ const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: 'registros', label: 'Registros', icon: ClipboardList },
 ];
 
+let mockEstudiantes: Estudiante[] = [];
+let mockDocentes: Docente[] = [];
+let mockRegistrosHoras: any[] = [];
+let areas: any[] = [];
+let carreras: string[] = [];
+
 // ─── Pagination helper ───
 function usePagination<T>(items: T[], pageSize: number) {
   const [page, setPage] = useState(1);
@@ -61,7 +67,35 @@ function usePagination<T>(items: T[], pageSize: number) {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════
 export const DashboardAdmin: React.FC = () => {
+  const {
+    areas: bridgeAreas,
+    carreras: bridgeCarreras,
+    mockDocentes: bridgeDocentes,
+    mockEstudiantes: bridgeEstudiantes,
+    mockRegistrosHoras: bridgeRegistros,
+    isLoading,
+    error,
+  } = useLegacyDataBridge();
+
+  mockEstudiantes = bridgeEstudiantes;
+  mockDocentes = bridgeDocentes;
+  mockRegistrosHoras = bridgeRegistros;
+  areas = bridgeAreas;
+  carreras = bridgeCarreras;
+
   const [activeTab, setActiveTab] = useState<Tab>('resumen');
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando dashboard...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
+  if (mockEstudiantes.length === 0) {
+    return <div className="p-6 text-sm text-gray-500">No hay datos disponibles para mostrar el dashboard.</div>;
+  }
 
   // ── Global KPIs ──
   const totalEstudiantes = mockEstudiantes.length;
