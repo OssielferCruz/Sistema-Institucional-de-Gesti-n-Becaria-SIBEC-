@@ -7,9 +7,9 @@ import {
   Users, ChevronDown, ChevronRight, User, GraduationCap, Mail, MapPin,
   Search, BookOpen, Clock, Calendar, FileText, TrendingUp
 } from 'lucide-react';
-import { mockDocentes, mockEstudiantes, mockRegistrosHoras } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
 import { StatusBadge } from '../components/shared/StatusBadge';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 import {
   Collapsible,
   CollapsibleContent,
@@ -20,10 +20,19 @@ type Vista = 'estudiantes' | 'docentes';
 
 export const DocentesSubordinados: React.FC = () => {
   const { user } = useAuth();
+  const { mockDocentes, mockEstudiantes, mockRegistrosHoras, isLoading, error } = useLegacyDataBridge();
   const [expandedDocentes, setExpandedDocentes] = useState<{ [key: string]: boolean }>({});
   const [expandedEstudiantes, setExpandedEstudiantes] = useState<{ [key: string]: boolean }>({});
   const [vista, setVista] = useState<Vista>('estudiantes');
   const [busqueda, setBusqueda] = useState('');
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando datos de docentes y estudiantes...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   const carrerasJefe = user?.carrerasAsignadas || (user?.carrera ? [user.carrera] : []);
 
