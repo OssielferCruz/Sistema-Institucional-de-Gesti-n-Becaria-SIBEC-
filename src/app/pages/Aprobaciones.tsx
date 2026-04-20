@@ -49,9 +49,9 @@ export const Aprobaciones: React.FC = () => {
   );
 
   // Counts
-  const pendientes = registrosCarrera.filter(r => r.estado === 'aprobada' && !r.validadoPorJefatura);
-  const validadas = registrosCarrera.filter(r => r.estado === 'aprobada' && r.validadoPorJefatura);
-  const rechazadas = registrosCarrera.filter(r => r.estado === 'rechazada' && r.rechazadoPorJefatura);
+  const pendientes = registrosCarrera.filter(r => r.estado === 'pendiente');
+  const validadas = registrosCarrera.filter(r => r.estado === 'aprobada');
+  const rechazadas = registrosCarrera.filter(r => r.estado === 'rechazada');
 
   // Filter by tab
   const registrosPorTab = useMemo(() => {
@@ -312,7 +312,7 @@ export const Aprobaciones: React.FC = () => {
                 {/* Records list */}
                 <div className="divide-y divide-gray-50">
                   {visibles.map(registro => {
-                    const isPendiente = registro.estado === 'aprobada' && !registro.validadoPorJefatura;
+                    const isPendiente = registro.estado === 'pendiente';
                     return (
                       <div key={registro.id} className="px-5 py-4 hover:bg-gray-50/50 transition-colors">
                         <div className="flex items-start gap-4">
@@ -575,7 +575,7 @@ export const Aprobaciones: React.FC = () => {
                   <Badge className="bg-green-100 text-green-800 border border-green-300 text-xs">
                     Validado por Jefatura
                   </Badge>
-                ) : selectedRegistro.estado === 'aprobada' ? (
+                ) : selectedRegistro.estado === 'pendiente' ? (
                   <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 text-xs">
                     Pendiente de validación
                   </Badge>
@@ -598,7 +598,7 @@ export const Aprobaciones: React.FC = () => {
             <Button variant="outline" onClick={() => setShowDetalleDialog(false)}>
               Cerrar
             </Button>
-            {selectedRegistro?.estado === 'aprobada' && !selectedRegistro?.validadoPorJefatura && (
+            {selectedRegistro?.estado === 'pendiente' && (
               <>
                 <Button
                   variant="ghost"

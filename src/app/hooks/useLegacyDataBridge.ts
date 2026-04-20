@@ -193,9 +193,7 @@ function mapLegacy(payload: LegacyPayload): Omit<LegacyDataBridgeResult, 'isLoad
 
       return {
         ...base,
-        estado: 'aprobada',
-        aprobadoPor: teacherName,
-        validadoPorJefatura: false,
+        estado: 'pendiente',
       };
     })
     .filter((value): value is RegistroHoraExtended => value !== null)
