@@ -17,8 +17,8 @@ import {
   Eye
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { mockEstudiantes, mockDocentes, mockRegistrosHoras } from '../data/mockData';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 
 // Modal para ver detalles del día
 interface ModalDetallesDiaProps {
@@ -155,14 +155,23 @@ const ModalDetallesDia: React.FC<ModalDetallesDiaProps> = ({ isOpen, onClose, es
 
 export const ControlAsistencia: React.FC = () => {
   const { user } = useAuth();
+  const { mockEstudiantes, mockDocentes, mockRegistrosHoras, isLoading, error } = useLegacyDataBridge();
   const [semanaActual, setSemanaActual] = useState(12);
   const [busquedaEstudiante, setBusquedaEstudiante] = useState('');
   const [modalAbierto, setModalAbierto] = useState(false);
   const [diaSeleccionado, setDiaSeleccionado] = useState<any>(null);
   const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<any>(null);
 
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando asistencia...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
   // Obtener docente actual o datos de jefatura
-  const docente = mockDocentes.find(d => d.email === user?.email);
+  const docente = mockDocentes.find(d => d.id === user?.docenteId) ?? mockDocentes.find(d => d.email === user?.email);
 
   // Filtrar estudiantes según el rol (MOSTRAR TODOS LOS ESTADOS)
   let estudiantesAsignados: any[] = [];
