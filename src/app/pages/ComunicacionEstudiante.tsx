@@ -13,11 +13,24 @@ import {
   Building2,
   ShieldCheck
 } from 'lucide-react';
-import { mockEstudiantes, mockDocentes } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
+import { useCommunicationDirectory } from '../hooks/useCommunicationDirectory';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
+import { formatFullName } from '../utils/communication';
 
 export const ComunicacionEstudiante: React.FC = () => {
   const { user } = useAuth();
+  const {
+    mockEstudiantes,
+    mockDocentes,
+    isLoading: isLoadingBridge,
+    error: bridgeError,
+  } = useLegacyDataBridge();
+  const {
+    departmentHeads,
+    isLoading: isLoadingDirectory,
+    error: directoryError,
+  } = useCommunicationDirectory();
 
   const estudianteActual = mockEstudiantes.find(e => e.id === user?.estudianteId);
 
@@ -38,6 +51,17 @@ export const ComunicacionEstudiante: React.FC = () => {
   };
 
   const nombreEstudiante = estudianteActual?.nombre.split(' ')[0] || user?.name?.split(' ')[0] || 'Estudiante';
+
+  const careerCode = estudianteActual?.carrera?.split(' - ')[0]?.toUpperCase() ?? '';
+  const jefaturaCarrera = departmentHeads.find((head) => head.career.code.toUpperCase() === careerCode);
+
+  if (isLoadingBridge || isLoadingDirectory) {
+    return <div className="p-6 text-sm text-gray-500">Cargando comunicación...</div>;
+  }
+
+  if (bridgeError || directoryError) {
+    return <div className="p-6 text-sm text-red-600">{bridgeError ?? directoryError}</div>;
+  }
 
   // Contactos del estudiante
   const contactos = [
@@ -67,8 +91,8 @@ export const ComunicacionEstudiante: React.FC = () => {
     },
     {
       id: 'jefatura',
-      nombre: 'Jefatura de Carrera',
-      email: 'jefatura@ulsa.mx',
+      nombre: jefaturaCarrera ? formatFullName(jefaturaCarrera.user.first_name, jefaturaCarrera.user.last_name) : 'Jefatura de Carrera',
+      email: jefaturaCarrera?.user.email ?? 'jefatura@sibec.local',
       rol: 'Jefatura de Carrera',
       area: estudianteActual?.carrera?.split(' - ')[0] || 'Ingeniería',
       subarea: 'Coordinación Académica',
