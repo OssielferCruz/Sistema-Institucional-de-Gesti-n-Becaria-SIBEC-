@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -13,11 +13,12 @@ import {
   ArrowRightLeft, X, Save, Filter, Layers, Target, Mail, Check, Copy,
   FileText, Calendar, BookOpen, Shield
 } from 'lucide-react';
-import {
-  mockEstudiantes as initialEstudiantes, mockDocentes, areas, carreras,
-  Estudiante
-} from '../data/mockData';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 import { toast } from 'sonner';
+
+type Estudiante = ReturnType<typeof useLegacyDataBridge>['mockEstudiantes'][number];
+type Area = ReturnType<typeof useLegacyDataBridge>['areas'][number];
+type Docente = ReturnType<typeof useLegacyDataBridge>['mockDocentes'][number];
 
 // ─── Constants ───
 const AREA_COLORS: Record<string, string> = {
@@ -57,8 +58,21 @@ const mockHistorial = [
 ];
 
 export const ControlBecados: React.FC = () => {
+  const { mockEstudiantes, mockDocentes, areas, carreras, isLoading, error } = useLegacyDataBridge();
   const [activeTab, setActiveTab] = useState<ControlTab>('gestion');
-  const [estudiantes, setEstudiantes] = useState<Estudiante[]>([...initialEstudiantes]);
+  const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
+
+  useEffect(() => {
+    setEstudiantes([...mockEstudiantes]);
+  }, [mockEstudiantes]);
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando control de becados...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   // Stats
   const totalBecados = estudiantes.length;
@@ -136,9 +150,24 @@ export const ControlBecados: React.FC = () => {
       </div>
 
       {activeTab === 'gestion' && <TabGestion estudiantes={estudiantes} setEstudiantes={setEstudiantes} />}
-      {activeTab === 'agregar' && <TabAgregar estudiantes={estudiantes} setEstudiantes={setEstudiantes} />}
+      {activeTab === 'agregar' && (
+        <TabAgregar
+          estudiantes={estudiantes}
+          setEstudiantes={setEstudiantes}
+          carreras={carreras}
+          areas={areas}
+          mockDocentes={mockDocentes}
+        />
+      )}
       {activeTab === 'importar' && <TabImportar />}
-      {activeTab === 'asignaciones' && <TabAsignaciones estudiantes={estudiantes} setEstudiantes={setEstudiantes} />}
+      {activeTab === 'asignaciones' && (
+        <TabAsignaciones
+          estudiantes={estudiantes}
+          setEstudiantes={setEstudiantes}
+          areas={areas}
+          mockDocentes={mockDocentes}
+        />
+      )}
       {activeTab === 'historial' && <TabHistorial />}
     </div>
   );
@@ -505,7 +534,10 @@ const TabGestion: React.FC<{
 const TabAgregar: React.FC<{
   estudiantes: Estudiante[];
   setEstudiantes: React.Dispatch<React.SetStateAction<Estudiante[]>>;
-}> = ({ estudiantes, setEstudiantes }) => {
+  carreras: string[];
+  areas: Area[];
+  mockDocentes: Docente[];
+}> = ({ estudiantes, setEstudiantes, carreras, areas, mockDocentes }) => {
   const [form, setForm] = useState({
     nombre: '', matricula: '', carrera: carreras[0], email: '', cuatrimestre: 'ENE-ABR 2026',
     areaActual: '', subarea: '', docenteResponsableId: '', cursoAsignado: '',
@@ -891,7 +923,9 @@ const TabImportar: React.FC = () => {
 const TabAsignaciones: React.FC<{
   estudiantes: Estudiante[];
   setEstudiantes: React.Dispatch<React.SetStateAction<Estudiante[]>>;
-}> = ({ estudiantes, setEstudiantes }) => {
+  areas: Area[];
+  mockDocentes: Docente[];
+}> = ({ estudiantes, setEstudiantes, areas, mockDocentes }) => {
   const [search, setSearch] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<string>('');
   const [newArea, setNewArea] = useState('');
