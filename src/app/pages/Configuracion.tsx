@@ -13,8 +13,14 @@ import {
   Layers, Target, Mail, RefreshCw, Download, Upload, Lock, Unlock, Save,
   BookOpen, UserCheck, UserX, Activity, Zap, Globe, Server
 } from 'lucide-react';
-import { areas, cuatrimestres, mockDocentes, mockEstudiantes, carreras } from '../data/mockData';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 import { toast } from 'sonner';
+
+let areas: any[] = [];
+let cuatrimestres: string[] = [];
+let mockDocentes: any[] = [];
+let mockEstudiantes: any[] = [];
+let carreras: string[] = [];
 
 // ─── Types ───
 type ConfigTab = 'general' | 'roles' | 'areas' | 'periodos' | 'usuarios' | 'sistema';
@@ -72,6 +78,22 @@ const defaultConfig: SistemConfig = {
 };
 
 export const Configuracion: React.FC = () => {
+  const {
+    areas: bridgeAreas,
+    cuatrimestres: bridgeCuatrimestres,
+    mockDocentes: bridgeDocentes,
+    mockEstudiantes: bridgeEstudiantes,
+    carreras: bridgeCarreras,
+    isLoading,
+    error,
+  } = useLegacyDataBridge();
+
+  areas = bridgeAreas;
+  cuatrimestres = bridgeCuatrimestres;
+  mockDocentes = bridgeDocentes;
+  mockEstudiantes = bridgeEstudiantes;
+  carreras = bridgeCarreras;
+
   const [activeTab, setActiveTab] = useState<ConfigTab>('general');
   const [config, setConfig] = useState<SistemConfig>(defaultConfig);
   const [expandedRole, setExpandedRole] = useState<string | null>(null);
@@ -81,6 +103,14 @@ export const Configuracion: React.FC = () => {
   const [isAreaDialogOpen, setIsAreaDialogOpen] = useState(false);
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando configuración...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   const totalUsuarios = mockUsuarios.length;
   const usuariosActivos = mockUsuarios.filter(u => u.activo).length;
