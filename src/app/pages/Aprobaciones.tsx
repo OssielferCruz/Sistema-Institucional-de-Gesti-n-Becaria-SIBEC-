@@ -37,7 +37,7 @@ export const Aprobaciones: React.FC = () => {
         && carrerasJefe.includes(estudiante.carrera)
         && estudiante.areaActual === 'Asistencia Docente';
     }),
-    [carrerasJefe]
+    [mockRegistrosHoras, mockEstudiantes, carrerasJefe]
   );
 
   // Estudiantes de Asistencia Docente de las carreras del jefe (para contexto)
@@ -45,13 +45,13 @@ export const Aprobaciones: React.FC = () => {
     mockEstudiantes.filter(e =>
       carrerasJefe.includes(e.carrera) && e.areaActual === 'Asistencia Docente'
     ),
-    [carrerasJefe]
+    [mockEstudiantes, carrerasJefe]
   );
 
   // Counts
-  const pendientes = registrosCarrera.filter(r => r.estado === 'aprobada' && !(r as any).validadoPorJefatura);
-  const validadas = registrosCarrera.filter(r => r.estado === 'aprobada' && (r as any).validadoPorJefatura);
-  const rechazadas = registrosCarrera.filter(r => r.estado === 'rechazada' && (r as any).rechazadoPorJefatura);
+  const pendientes = registrosCarrera.filter(r => r.estado === 'aprobada' && !r.validadoPorJefatura);
+  const validadas = registrosCarrera.filter(r => r.estado === 'aprobada' && r.validadoPorJefatura);
+  const rechazadas = registrosCarrera.filter(r => r.estado === 'rechazada' && r.rechazadoPorJefatura);
 
   // Filter by tab
   const registrosPorTab = useMemo(() => {
@@ -312,7 +312,7 @@ export const Aprobaciones: React.FC = () => {
                 {/* Records list */}
                 <div className="divide-y divide-gray-50">
                   {visibles.map(registro => {
-                    const isPendiente = registro.estado === 'aprobada' && !(registro as any).validadoPorJefatura;
+                    const isPendiente = registro.estado === 'aprobada' && !registro.validadoPorJefatura;
                     return (
                       <div key={registro.id} className="px-5 py-4 hover:bg-gray-50/50 transition-colors">
                         <div className="flex items-start gap-4">
@@ -571,7 +571,7 @@ export const Aprobaciones: React.FC = () => {
               <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
                 <span className="text-xs text-gray-500 mr-1">Estado:</span>
                 <StatusBadge status={selectedRegistro.estado} />
-                {(selectedRegistro as any).validadoPorJefatura ? (
+                {selectedRegistro.validadoPorJefatura ? (
                   <Badge className="bg-green-100 text-green-800 border border-green-300 text-xs">
                     Validado por Jefatura
                   </Badge>
@@ -598,7 +598,7 @@ export const Aprobaciones: React.FC = () => {
             <Button variant="outline" onClick={() => setShowDetalleDialog(false)}>
               Cerrar
             </Button>
-            {selectedRegistro?.estado === 'aprobada' && !(selectedRegistro as any)?.validadoPorJefatura && (
+            {selectedRegistro?.estado === 'aprobada' && !selectedRegistro?.validadoPorJefatura && (
               <>
                 <Button
                   variant="ghost"
