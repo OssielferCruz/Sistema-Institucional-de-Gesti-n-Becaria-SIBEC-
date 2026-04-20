@@ -8,13 +8,13 @@ import {
   TrendingUp, Search, ChevronDown, ChevronUp, MapPin, BarChart3, X,
   GraduationCap, AlertCircle, Calendar, CheckCircle
 } from 'lucide-react';
-import { mockEstudiantes, mockDocentes, mockRegistrosHoras, cuatrimestres, areas } from '../data/mockData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { StatusBadge } from '../components/shared/StatusBadge';
 import { Progress } from '../components/ui/progress';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
@@ -40,6 +40,7 @@ const getCarreraColor = (carrera: string) => {
 
 export const Reportes: React.FC = () => {
   const { user } = useAuth();
+  const { mockEstudiantes, mockDocentes, mockRegistrosHoras, cuatrimestres, areas, isLoading, error } = useLegacyDataBridge();
   const [filterCarrera, setFilterCarrera] = useState('todas');
   const [filterCuatrimestre, setFilterCuatrimestre] = useState('todos');
   const [filterArea, setFilterArea] = useState('todas');
@@ -48,6 +49,14 @@ export const Reportes: React.FC = () => {
   const [tab, setTab] = useState<TabReporte>('resumen');
   const [sortField, setSortField] = useState<'nombre' | 'horas' | 'progreso'>('nombre');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando reportes...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   const isJefatura = user?.role === 'jefatura';
   const carrerasJefe = user?.carrerasAsignadas || (user?.carrera ? [user.carrera] : []);
