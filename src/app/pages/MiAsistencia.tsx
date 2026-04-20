@@ -22,7 +22,7 @@ import {
   FileText
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { mockEstudiantes, mockRegistrosHoras } from '../data/mockData';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { StatusBadge } from '../components/shared/StatusBadge';
@@ -45,6 +45,7 @@ interface EventoCalendario {
 
 export const MiAsistencia: React.FC = () => {
   const { user } = useAuth();
+  const { mockEstudiantes, mockRegistrosHoras, isLoading, error } = useLegacyDataBridge();
   const [mesSeleccionado, setMesSeleccionado] = useState(new Date(2026, 2, 1)); // Marzo 2026
   const [vistaActiva, setVistaActiva] = useState<'calendario' | 'tabla'>('calendario');
   
@@ -65,7 +66,18 @@ export const MiAsistencia: React.FC = () => {
   const [modalDetallesAbierto, setModalDetallesAbierto] = useState(false);
 
   // Obtener información del estudiante
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando asistencia...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
   const estudiante = mockEstudiantes.find(e => e.email === user?.email) || mockEstudiantes[0];
+  if (!estudiante) {
+    return <div className="p-6 text-sm text-gray-500">No se encontró información del estudiante.</div>;
+  }
 
   // Obtener registros de horas del estudiante
   const registrosEstudiante = mockRegistrosHoras.filter(r => r.estudianteId === estudiante.id);
