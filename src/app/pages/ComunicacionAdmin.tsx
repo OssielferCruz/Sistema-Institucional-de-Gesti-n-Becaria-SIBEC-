@@ -160,7 +160,7 @@ export const ComunicacionAdmin: React.FC = () => {
       byArea[a].count++;
     });
     return byArea;
-  }, []);
+  }, [mockEstudiantes]);
 
   const estudiantesEnRiesgo = mockEstudiantes.filter(e => e.estado === 'activo' && (e.horasCompletadas / e.horasRequeridas) < 0.3);
 
