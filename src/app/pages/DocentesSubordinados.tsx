@@ -26,14 +26,6 @@ export const DocentesSubordinados: React.FC = () => {
   const [vista, setVista] = useState<Vista>('estudiantes');
   const [busqueda, setBusqueda] = useState('');
 
-  if (isLoading) {
-    return <div className="p-6 text-sm text-gray-500">Cargando datos de docentes y estudiantes...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-sm text-red-600">{error}</div>;
-  }
-
   const carrerasJefe = user?.carrerasAsignadas || (user?.carrera ? [user.carrera] : []);
 
   // Solo docentes de Asistencia Docente de las carreras del jefe
@@ -99,6 +91,14 @@ export const DocentesSubordinados: React.FC = () => {
 
   const estudiantesActivos = estudiantesAsistencia.filter(e => e.estado === 'activo').length;
   const estudiantesCompletados = estudiantesAsistencia.filter(e => e.estado === 'completado').length;
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando datos de docentes y estudiantes...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   return (
     <div className="space-y-6">

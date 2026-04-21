@@ -38,9 +38,9 @@ export default function Login() {
       });
   };
 
-  const quickLogin = (userEmail: string) => {
+  const quickLogin = (userEmail: string, userPassword: string) => {
     setEmail(userEmail);
-    setPassword('Admin123456!');
+    setPassword(userPassword);
   };
 
   return (
@@ -108,7 +108,7 @@ export default function Login() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('admin@sibec.local')}
+                  onClick={() => quickLogin('admin@sibec.local', 'Admin123456!')}
                   className="text-xs"
                 >
                   Admin
@@ -116,7 +116,7 @@ export default function Login() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('jefatura@sibec.local')}
+                  onClick={() => quickLogin('jefatura.ice@sibec.local', 'Demo123456!')}
                   className="text-xs"
                 >
                   Jefatura
@@ -124,7 +124,7 @@ export default function Login() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('docente@sibec.local')}
+                  onClick={() => quickLogin('docente.iceiem@sibec.local', 'Demo123456!')}
                   className="text-xs"
                 >
                   Docente
@@ -132,14 +132,14 @@ export default function Login() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('estudiante@sibec.local')}
+                  onClick={() => quickLogin('estudiante.001@sibec.local', 'Demo123456!')}
                   className="text-xs"
                 >
                   Estudiante
                 </Button>
               </div>
               <p className="text-xs text-gray-400 mt-2 text-center">
-                Contraseña demo backend: Admin123456!
+                Admin: Admin123456! | Otros roles: Demo123456!
               </p>
             </div>
           </CardContent>
