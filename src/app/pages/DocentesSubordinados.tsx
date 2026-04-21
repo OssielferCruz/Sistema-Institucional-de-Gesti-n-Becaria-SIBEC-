@@ -45,7 +45,7 @@ export const DocentesSubordinados: React.FC = () => {
       }
       return false;
     }),
-    [carrerasJefe]
+    [mockDocentes, carrerasJefe]
   );
 
   // Solo estudiantes de Asistencia Docente de las carreras del jefe
@@ -53,7 +53,7 @@ export const DocentesSubordinados: React.FC = () => {
     mockEstudiantes.filter(e =>
       carrerasJefe.includes(e.carrera) && e.areaActual === 'Asistencia Docente'
     ),
-    [carrerasJefe]
+    [mockEstudiantes, carrerasJefe]
   );
 
   // Search filtering
