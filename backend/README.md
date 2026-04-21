@@ -58,3 +58,8 @@ Ejecutar pruebas con coverage:
 
 - POST /api/v1/students/import_csv/
 - Form-data con campo file
+
+## Healthcheck
+
+- GET /healthz/
+- Respuesta esperada: status ok, database up
