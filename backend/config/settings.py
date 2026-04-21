@@ -126,7 +126,15 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=['http://127.0.0.1:5173', 'http://localhost:5173'])
+CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])
+CORS_ALLOWED_ORIGIN_REGEXES = env.list('CORS_ALLOWED_ORIGIN_REGEXES', default=[])
+
+if DEBUG and not CORS_ALLOWED_ORIGINS and not CORS_ALLOWED_ORIGIN_REGEXES:
+    # Allow localhost/127.0.0.1 on any port for local frontend dev servers.
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r'^https?://localhost(:\d+)?$',
+        r'^https?://127\.0\.0\.1(:\d+)?$',
+    ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
