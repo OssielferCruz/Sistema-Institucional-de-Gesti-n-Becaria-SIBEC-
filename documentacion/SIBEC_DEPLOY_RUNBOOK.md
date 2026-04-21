@@ -52,6 +52,14 @@ python manage.py seed_initial_data
 python -m pytest -q
 ```
 
+Comando de arranque productivo (WSGI):
+
+```bash
+gunicorn config.wsgi --log-file - --workers 3 --threads 2 --timeout 120
+```
+
+Nota: tambien se incluye `backend/Procfile` para plataformas que lo detectan automaticamente.
+
 ## Verificaciones post-deploy
 - Backend responde 200 en /healthz/ y /readyz/.
 - Login funciona con JWT.

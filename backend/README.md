@@ -68,3 +68,14 @@ Ejecutar pruebas con coverage:
 
 - GET /readyz/
 - Respuesta esperada: status ready, database up
+
+## Ejecucion en produccion
+
+- Dependencia WSGI: `gunicorn` (incluida en requirements.txt)
+- Comando sugerido:
+
+```
+gunicorn config.wsgi --log-file - --workers 3 --threads 2 --timeout 120
+```
+
+- Para plataformas como Render/Railway se incluye `Procfile` en este directorio.
