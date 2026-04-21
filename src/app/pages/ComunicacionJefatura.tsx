@@ -16,11 +16,17 @@ import {
   ShieldCheck,
   Clock
 } from 'lucide-react';
-import { mockEstudiantes, mockDocentes } from '../data/mockData';
 import { useAuth } from '../context/AuthContext';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 
 export const ComunicacionJefatura: React.FC = () => {
   const { user } = useAuth();
+  const {
+    mockEstudiantes,
+    mockDocentes,
+    isLoading,
+    error,
+  } = useLegacyDataBridge();
   const [busqueda, setBusqueda] = useState('');
   const [tab, setTab] = useState<'docentes' | 'estudiantes'>('docentes');
 
@@ -92,6 +98,14 @@ export const ComunicacionJefatura: React.FC = () => {
       default: return 'bg-gray-100 text-gray-800 border-gray-300';
     }
   };
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando comunicación...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   return (
     <div className="space-y-6">

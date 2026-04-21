@@ -10,7 +10,7 @@ import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { StatusBadge } from '../components/shared/StatusBadge';
-import { mockEstudiantes, mockDocentes, mockRegistrosHoras, areas, carreras, Estudiante } from '../data/mockData';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 
 // ─── Color maps ───
 const AREA_COLORS: Record<string, string> = {
@@ -40,6 +40,7 @@ function usePagination<T>(items: T[], pageSize: number) {
 const progColor = (p: number) => p < 30 ? '#EF5350' : p < 60 ? '#FFC107' : '#2E7D32';
 
 export const Estudiantes: React.FC = () => {
+  const { mockEstudiantes, mockDocentes, mockRegistrosHoras, isLoading, error } = useLegacyDataBridge();
   const [search, setSearch] = useState('');
   const [filterArea, setFilterArea] = useState('');
   const [filterCarrera, setFilterCarrera] = useState('');
@@ -48,10 +49,18 @@ export const Estudiantes: React.FC = () => {
   const [sortAsc, setSortAsc] = useState(true);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const [selectedStudent, setSelectedStudent] = useState<Estudiante | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
 
-  const uniqueAreas = useMemo(() => [...new Set(mockEstudiantes.map(e => e.areaActual).filter(Boolean))].sort() as string[], []);
-  const uniqueCarreras = useMemo(() => [...new Set(mockEstudiantes.map(e => getCarreraCode(e.carrera)))].sort(), []);
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando estudiantes...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
+  const uniqueAreas = useMemo(() => [...new Set(mockEstudiantes.map(e => e.areaActual).filter(Boolean))].sort() as string[], [mockEstudiantes]);
+  const uniqueCarreras = useMemo(() => [...new Set(mockEstudiantes.map(e => getCarreraCode(e.carrera)))].sort(), [mockEstudiantes]);
 
   const filtered = useMemo(() => {
     let data = mockEstudiantes.filter(e => {

@@ -3,16 +3,28 @@ import { Clock, CheckCircle, MapPin, User, Calendar, AlertCircle } from 'lucide-
 import { KPICard } from '../../components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Progress } from '../../components/ui/progress';
-import { mockRegistrosHoras, mockEstudiantes } from '../../data/mockData';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../../context/AuthContext';
+import { useLegacyDataBridge } from '../../hooks/useLegacyDataBridge';
 
 export const DashboardEstudiante: React.FC = () => {
   const { user } = useAuth();
+  const { mockEstudiantes, mockRegistrosHoras, isLoading, error } = useLegacyDataBridge();
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando dashboard...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
   
-  // Obtener datos del estudiante actual desde mockData
+  // Obtener datos del estudiante actual desde backend
   const estudiante = mockEstudiantes.find(e => e.email === user?.email) || mockEstudiantes[0];
+  if (!estudiante) {
+    return <div className="p-6 text-sm text-gray-500">No se encontró información del estudiante.</div>;
+  }
   
   // Filtrar registros del estudiante
   const misRegistros = mockRegistrosHoras.filter(r => r.estudianteId === estudiante.id).slice(0, 6);
@@ -41,12 +53,26 @@ export const DashboardEstudiante: React.FC = () => {
     return 'SEP-DIC (Periodo 3)';
   };
   
-  // Datos para el gráfico - horas por mes del cuatrimestre actual
-  const chartData = [
-    { id: 'mes-ene', mes: 'Ene', horas: 17 },
-    { id: 'mes-feb', mes: 'Feb', horas: 21 },
-    { id: 'mes-mar', mes: 'Mar', horas: 13 },
-  ];
+  // Datos para el gráfico - horas por mes
+  const chartData = React.useMemo(() => {
+    const monthly = mockRegistrosHoras
+      .filter(r => r.estudianteId === estudiante.id && r.estado === 'aprobada')
+      .reduce<Record<string, number>>((acc, registro) => {
+        const monthKey = registro.fecha.slice(0, 7);
+        acc[monthKey] = (acc[monthKey] ?? 0) + registro.totalHoras;
+        return acc;
+      }, {});
+
+    const formatter = new Intl.DateTimeFormat('es-ES', { month: 'short' });
+    return Object.entries(monthly)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, horas]) => {
+        const date = new Date(`${month}-01T00:00:00`);
+        const label = formatter.format(date);
+        const mes = label.charAt(0).toUpperCase() + label.slice(1).replace('.', '');
+        return { id: `mes-${month}`, mes, horas };
+      });
+  }, [mockRegistrosHoras, estudiante.id]);
 
   return (
     <div className="space-y-6">

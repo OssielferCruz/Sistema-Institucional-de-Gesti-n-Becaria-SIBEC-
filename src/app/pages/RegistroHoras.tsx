@@ -7,10 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Clock, Calendar, Save, Search, User, TrendingUp, AlertCircle, CheckCircle2, Award, X, Eye, FileText, ChevronDown, ChevronUp } from 'lucide-react';
-import { mockEstudiantes, mockRegistrosHoras, mockDocentes } from '../data/mockData';
 import { StatusBadge } from '../components/shared/StatusBadge';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
+import { useAuth } from '../context/AuthContext';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 
 // Modal para desglose de estadísticas
 interface ModalEstadisticasProps {
@@ -303,6 +304,8 @@ const ModalEstadisticas: React.FC<ModalEstadisticasProps> = ({ isOpen, onClose, 
 };
 
 export const RegistroHoras: React.FC = () => {
+  const { user } = useAuth();
+  const { mockEstudiantes, mockRegistrosHoras, mockDocentes, isLoading, error } = useLegacyDataBridge();
   const [busquedaEstudiante, setBusquedaEstudiante] = useState('');
   const [selectedEstudiante, setSelectedEstudiante] = useState('');
   const [fecha, setFecha] = useState('');
@@ -313,9 +316,21 @@ export const RegistroHoras: React.FC = () => {
   const [modalAbierto, setModalAbierto] = useState<'hoy' | 'semana' | 'totales' | null>(null);
   const [estudiantesExpandidos, setEstudiantesExpandidos] = useState<Set<string>>(new Set());
 
-  // Obtener el docente actual (en un caso real vendría del contexto de auth)
-  const docenteActualId = 'doc-1'; // Dr. Roberto Méndez
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando registro de horas...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
+  // Obtener el docente actual desde auth
+  const docenteActualId = user?.docenteId;
   const docenteActual = mockDocentes.find(d => d.id === docenteActualId);
+
+  if (!docenteActual) {
+    return <div className="p-6 text-sm text-gray-500">No se encontró información del docente actual.</div>;
+  }
 
   // Obtener estudiantes asignados al docente
   const estudiantesAsignados = useMemo(() => {

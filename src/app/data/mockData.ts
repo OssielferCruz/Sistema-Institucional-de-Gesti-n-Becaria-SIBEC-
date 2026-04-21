@@ -1,35 +1,7 @@
 // Mock data para el sistema SIBEC
 
-export interface Estudiante {
-  id: string;
-  nombre: string;
-  matricula: string;
-  carrera: string;
-  email: string;
-  horasRequeridas: number;
-  horasCompletadas: number; // Total de horas aprobadas en el año
-  horasAcumuladas: number; // Alias de horasCompletadas para compatibilidad
-  horasCompletadasPeriodo: number; // Horas aprobadas en el periodo actual
-  periodoActual: 1 | 2 | 3; // Periodo actual (1=ENE-ABR, 2=MAY-AGO, 3=SEP-DIC)
-  estado: 'activo' | 'inactivo' | 'completado';
-  areaActual?: string;
-  subarea?: string;
-  docenteResponsableId?: string;
-  docenteResponsable?: string;
-  cuatrimestre: string;
-  cursoAsignado?: string;
-}
-
-export interface Docente {
-  id: string;
-  nombre: string;
-  email: string;
-  area: string;
-  subarea?: string;
-  jefaturaAsignada?: string; // Para Asistencia Docente
-  carrerasAsignadas?: string[]; // Carreras que maneja este docente
-  estudiantesAsignados: string[]; // IDs de estudiantes
-}
+export type { Area, Docente, Estudiante, RegistroHora, Subarea } from '../types/domain';
+import type { Area, Docente, Estudiante, RegistroHora, Subarea } from '../types/domain';
 
 export interface Asignacion {
   id: string;
@@ -43,40 +15,6 @@ export interface Asignacion {
   fechaInicio: string;
   fechaFin?: string;
   estado: 'activa' | 'finalizada';
-}
-
-export interface RegistroHora {
-  id: string;
-  estudianteId: string;
-  estudianteNombre: string;
-  docenteId: string;
-  docenteNombre: string;
-  fecha: string;
-  horaInicio: string;
-  horaFin: string;
-  totalHoras: number;
-  descripcion: string;
-  area: string;
-  subarea?: string;
-  carrera: string;
-  estado: 'pendiente' | 'aprobada' | 'rechazada';
-  aprobadoPor?: string;
-  fechaAprobacion?: string;
-  comentario?: string;
-}
-
-export interface Area {
-  id: string;
-  nombre: string;
-  descripcion: string;
-  subareas?: Subarea[];
-}
-
-export interface Subarea {
-  id: string;
-  nombre: string;
-  descripcion?: string;
-  tieneEncargado: boolean;
 }
 
 // ÁREAS Y SUBÁREAS DEL SISTEMA

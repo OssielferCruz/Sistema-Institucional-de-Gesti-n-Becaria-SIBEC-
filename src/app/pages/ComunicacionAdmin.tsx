@@ -8,7 +8,9 @@ import {
   GraduationCap, ShieldCheck, Clock, Building2, Layers,
   AlertCircle, Crown
 } from 'lucide-react';
-import { mockEstudiantes, mockDocentes, areas, carreras } from '../data/mockData';
+import { useCommunicationDirectory } from '../hooks/useCommunicationDirectory';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
+import { formatFullName } from '../utils/communication';
 
 const AREA_COLORS: Record<string, string> = {
   'Asistencia Docente': '#2E7D32', 'Biblioteca': '#1565C0', 'Bienestar Estudiantil': '#6A1B9A',
@@ -20,23 +22,60 @@ const AREA_COLORS: Record<string, string> = {
 const getAreaColor = (a: string) => AREA_COLORS[a] || '#9E9E9E';
 const getCarreraCode = (c: string) => c.split(' - ')[0];
 
-// ─── Mock jefaturas ───
-const mockJefaturas = [
-  { id: 'jef-1', nombre: 'Ing. Marco A. Rivera', email: 'jefatura.ice@ulsa.mx', jefatura: 'ICE/IEM', carreras: ['ICE - Ingeniería en Cibernética Electrónica', 'IEM - Ingeniería Electromédica'], color: '#6A1B9A' },
-  { id: 'jef-2', nombre: 'Ing. Patricia Flores Gómez', email: 'jefatura.ime@ulsa.mx', jefatura: 'IME', carreras: ['IME - Ingeniería Mecánica y Energías Renovables'], color: '#F57F17' },
-  { id: 'jef-3', nombre: 'Mtro. Fernando Silva Reyes', email: 'jefatura@ulsa.mx', jefatura: 'IMS/IEL', carreras: ['IMS - Ingeniería Mecatrónica y Sistemas de Control', 'IEL - Ingeniería Eléctrica'], color: '#2E7D32' },
-  { id: 'jef-4', nombre: 'Ing. Laura Ramírez Torres', email: 'jefatura.igi@ulsa.mx', jefatura: 'IGI', carreras: ['IGI - Ingeniería en Gestión Industrial'], color: '#C62828' },
-  { id: 'jef-5', nombre: 'Lic. Carlos Vega Mendoza', email: 'jefatura.lcm@ulsa.mx', jefatura: 'LCM/LAF', carreras: ['LCM - Licenciatura Comercial con Énfasis en Mercadeo', 'LAF - Licenciatura Administrativa con énfasis en Finanzas'], color: '#EF6C00' },
-];
+type AdminJefatura = {
+  id: string;
+  nombre: string;
+  email: string;
+  jefatura: string;
+  carreras: string[];
+  color: string;
+};
 
 type Tab = 'docentes' | 'jefaturas' | 'estudiantes' | 'masivo';
 
 export const ComunicacionAdmin: React.FC = () => {
+  const {
+    mockEstudiantes,
+    mockDocentes,
+    isLoading: isLoadingBridge,
+    error: bridgeError,
+  } = useLegacyDataBridge();
+  const {
+    departmentHeads,
+    isLoading: isLoadingDirectory,
+    error: directoryError,
+  } = useCommunicationDirectory();
+
   const [busqueda, setBusqueda] = useState('');
   const [tab, setTab] = useState<Tab>('docentes');
   const [filterArea, setFilterArea] = useState('');
   const [filterCarrera, setFilterCarrera] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
+
+  const mockJefaturas = useMemo<AdminJefatura[]>(() => {
+    const CAREER_COLORS: Record<string, string> = {
+      ICE: '#6A1B9A',
+      IEM: '#6A1B9A',
+      IME: '#F57F17',
+      IMS: '#2E7D32',
+      IEL: '#2E7D32',
+      IGI: '#C62828',
+      LCM: '#EF6C00',
+      LAF: '#EF6C00',
+    };
+
+    return departmentHeads.map((head) => {
+      const code = head.career.code.toUpperCase();
+      return {
+        id: head.id,
+        nombre: formatFullName(head.user.first_name, head.user.last_name),
+        email: head.user.email,
+        jefatura: code,
+        carreras: [`${code} - ${head.career.name}`],
+        color: CAREER_COLORS[code] ?? '#2E7D32',
+      };
+    });
+  }, [departmentHeads]);
 
   const firma = `Saludos cordiales,\nOficina de Bienestar Estudiantil\nUniversidad Tecnológica La Salle`;
 
@@ -121,11 +160,19 @@ export const ComunicacionAdmin: React.FC = () => {
       byArea[a].count++;
     });
     return byArea;
-  }, []);
+  }, [mockEstudiantes]);
 
   const estudiantesEnRiesgo = mockEstudiantes.filter(e => e.estado === 'activo' && (e.horasCompletadas / e.horasRequeridas) < 0.3);
 
   const resetFilters = () => { setBusqueda(''); setFilterArea(''); setFilterCarrera(''); setFilterEstado(''); };
+
+  if (isLoadingBridge || isLoadingDirectory) {
+    return <div className="p-6 text-sm text-gray-500">Cargando comunicación...</div>;
+  }
+
+  if (bridgeError || directoryError) {
+    return <div className="p-6 text-sm text-red-600">{bridgeError ?? directoryError}</div>;
+  }
 
   return (
     <div className="space-y-5">
@@ -294,7 +341,9 @@ export const ComunicacionAdmin: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {jefaturasFiltradas.map(jef => {
               const estCarreras = mockEstudiantes.filter(e => jef.carreras.includes(e.carrera) && e.areaActual === 'Asistencia Docente');
-              const docCarreras = mockDocentes.filter(d => d.area === 'Asistencia Docente' && d.jefaturaAsignada === jef.jefatura);
+              const docCarreras = mockDocentes.filter(
+                d => d.area === 'Asistencia Docente' && (d.carrerasAsignadas ?? []).some(c => jef.carreras.includes(c)),
+              );
               return (
                 <Card key={jef.id} className="bg-white border-none shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                   <div className="h-1" style={{ backgroundColor: jef.color }} />

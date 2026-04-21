@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { StatusBadge } from '../components/shared/StatusBadge';
-import { mockEstudiantes, mockDocentes, mockRegistrosHoras, areas, cuatrimestres } from '../data/mockData';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 import { toast } from 'sonner';
 
 // ─── Color maps ───
@@ -37,6 +37,16 @@ const progColor = (p: number) => p < 30 ? '#EF5350' : p < 60 ? '#FFC107' : '#2E7
 type ViewMode = 'grid' | 'ranking' | 'asignaciones';
 
 export const Asignaciones: React.FC = () => {
+  const {
+    areas,
+    cuatrimestres,
+    mockDocentes,
+    mockEstudiantes,
+    mockRegistrosHoras,
+    isLoading,
+    error,
+  } = useLegacyDataBridge();
+
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [selectedAreaId, setSelectedAreaId] = useState<string | null>(null);
   const [expandedDoc, setExpandedDoc] = useState<string | null>(null);
@@ -68,7 +78,7 @@ export const Asignaciones: React.FC = () => {
       const pendientesArea = registrosArea.filter(r => r.estado === 'pendiente').length;
       return { ...area, docentes: docentesArea, estudiantes: estudiantesArea, horasTotal, horasMeta, activos, completados, enRiesgo, promedio, pendientes: pendientesArea };
     });
-  }, []);
+  }, [areas, mockDocentes, mockEstudiantes, mockRegistrosHoras]);
 
   const areasConDatos = areasData.filter(a => a.estudiantes.length > 0 || a.docentes.length > 0);
   const areasRanked = [...areasConDatos].sort((a, b) => b.promedio - a.promedio);
@@ -112,6 +122,14 @@ export const Asignaciones: React.FC = () => {
     setIsDialogOpen(false);
     setSelEstudiante(''); setSelArea(''); setSelSubarea(''); setSelDocente(''); setSelCuatrimestre('');
   };
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando asignaciones...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   // ── AREA DETAIL VIEW ──
   if (selectedAreaData) {

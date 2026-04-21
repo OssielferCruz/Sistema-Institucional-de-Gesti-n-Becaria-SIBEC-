@@ -13,13 +13,28 @@ import {
   Send,
   Users
 } from 'lucide-react';
-import { mockEstudiantes, mockDocentes } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 
 export const Mensajes: React.FC = () => {
+  const { user } = useAuth();
+  const { mockEstudiantes, mockDocentes, isLoading, error } = useLegacyDataBridge();
   const [busqueda, setBusqueda] = useState('');
 
-  const docenteActualId = 'doc-1';
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando mensajes...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
+  const docenteActualId = user?.docenteId;
   const docenteActual = mockDocentes.find(d => d.id === docenteActualId);
+
+  if (!docenteActual) {
+    return <div className="p-6 text-sm text-gray-500">No se encontró información del docente actual.</div>;
+  }
 
   const estudiantesAsignados = mockEstudiantes.filter(est =>
     docenteActual?.estudiantesAsignados.includes(est.id)

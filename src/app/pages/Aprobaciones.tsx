@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { CheckCircle, XCircle, Clock, Send, Eye, MessageSquare, Search, MapPin, User, Calendar, ChevronDown, ChevronUp, ListFilter, FileCheck } from 'lucide-react';
-import { mockRegistrosHoras, mockEstudiantes } from '../data/mockData';
+import { approveHoursLog, rejectHoursLog } from '../api/portalApi';
 import { StatusBadge } from '../components/shared/StatusBadge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Textarea } from '../components/ui/textarea';
@@ -11,14 +11,16 @@ import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
 import { Badge } from '../components/ui/badge';
+import { type RegistroHoraExtended, useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 
 type TabFilter = 'pendientes' | 'validadas' | 'rechazadas' | 'todas';
 
 export const Aprobaciones: React.FC = () => {
   const { user } = useAuth();
+  const { mockRegistrosHoras, mockEstudiantes, isLoading, error, refresh } = useLegacyDataBridge();
   const [activeTab, setActiveTab] = useState<TabFilter>('pendientes');
   const [busqueda, setBusqueda] = useState('');
-  const [selectedRegistro, setSelectedRegistro] = useState<any>(null);
+  const [selectedRegistro, setSelectedRegistro] = useState<RegistroHoraExtended | null>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [showDetalleDialog, setShowDetalleDialog] = useState(false);
   const [accion, setAccion] = useState<'validar' | 'rechazar'>('validar');
@@ -35,7 +37,7 @@ export const Aprobaciones: React.FC = () => {
         && carrerasJefe.includes(estudiante.carrera)
         && estudiante.areaActual === 'Asistencia Docente';
     }),
-    [carrerasJefe]
+    [mockRegistrosHoras, mockEstudiantes, carrerasJefe]
   );
 
   // Estudiantes de Asistencia Docente de las carreras del jefe (para contexto)
@@ -43,13 +45,13 @@ export const Aprobaciones: React.FC = () => {
     mockEstudiantes.filter(e =>
       carrerasJefe.includes(e.carrera) && e.areaActual === 'Asistencia Docente'
     ),
-    [carrerasJefe]
+    [mockEstudiantes, carrerasJefe]
   );
 
   // Counts
-  const pendientes = registrosCarrera.filter(r => r.estado === 'aprobada' && !(r as any).validadoPorJefatura);
-  const validadas = registrosCarrera.filter(r => r.estado === 'aprobada' && (r as any).validadoPorJefatura);
-  const rechazadas = registrosCarrera.filter(r => r.estado === 'rechazada' && (r as any).rechazadoPorJefatura);
+  const pendientes = registrosCarrera.filter(r => r.estado === 'pendiente');
+  const validadas = registrosCarrera.filter(r => r.estado === 'aprobada');
+  const rechazadas = registrosCarrera.filter(r => r.estado === 'rechazada');
 
   // Filter by tab
   const registrosPorTab = useMemo(() => {
@@ -87,32 +89,53 @@ export const Aprobaciones: React.FC = () => {
     return Array.from(map.values()).sort((a, b) => b.registros.length - a.registros.length);
   }, [registrosFiltrados]);
 
-  const handleAccion = (registro: any, tipo: 'validar' | 'rechazar') => {
+  const handleAccion = (registro: RegistroHoraExtended, tipo: 'validar' | 'rechazar') => {
     setSelectedRegistro(registro);
     setAccion(tipo);
     setComentario('');
     setShowDialog(true);
   };
 
-  const handleVerDetalle = (registro: any) => {
+  const handleVerDetalle = (registro: RegistroHoraExtended) => {
     setSelectedRegistro(registro);
     setShowDetalleDialog(true);
   };
 
-  const handleConfirmar = () => {
-    const mensaje = accion === 'validar' ? 'validado y enviado a Bienestar' : 'rechazado';
-    toast.success(`Registro ${mensaje} exitosamente`);
-    setShowDialog(false);
-    setComentario('');
-    setSelectedRegistro(null);
+  const handleConfirmar = async () => {
+    if (!selectedRegistro) {
+      return;
+    }
+
+    try {
+      if (accion === 'validar') {
+        await approveHoursLog(selectedRegistro.id);
+      } else {
+        await rejectHoursLog(selectedRegistro.id, comentario.trim());
+      }
+
+      await refresh();
+      const mensaje = accion === 'validar' ? 'validado y enviado a Bienestar' : 'rechazado';
+      toast.success(`Registro ${mensaje} exitosamente`);
+      setShowDialog(false);
+      setComentario('');
+      setSelectedRegistro(null);
+    } catch (confirmError) {
+      toast.error(confirmError instanceof Error ? confirmError.message : 'No fue posible procesar el registro.');
+    }
   };
 
   const handleEnviarReporte = () => {
     toast.success('Reporte semanal enviado a Bienestar Estudiantil');
   };
 
-  const handleValidarTodos = () => {
-    toast.success(`${pendientes.length} registros validados y enviados a Bienestar`);
+  const handleValidarTodos = async () => {
+    try {
+      await Promise.all(pendientes.map((registro) => approveHoursLog(registro.id)));
+      await refresh();
+      toast.success(`${pendientes.length} registros validados y enviados a Bienestar`);
+    } catch (confirmError) {
+      toast.error(confirmError instanceof Error ? confirmError.message : 'No fue posible validar todos los registros.');
+    }
   };
 
   const tabs: { key: TabFilter; label: string; count: number; color: string; icon: React.ReactNode }[] = [
@@ -126,6 +149,14 @@ export const Aprobaciones: React.FC = () => {
     nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
   const getEstudiante = (id: string) => mockEstudiantes.find(e => e.id === id);
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando aprobaciones...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -281,7 +312,7 @@ export const Aprobaciones: React.FC = () => {
                 {/* Records list */}
                 <div className="divide-y divide-gray-50">
                   {visibles.map(registro => {
-                    const isPendiente = registro.estado === 'aprobada' && !(registro as any).validadoPorJefatura;
+                    const isPendiente = registro.estado === 'pendiente';
                     return (
                       <div key={registro.id} className="px-5 py-4 hover:bg-gray-50/50 transition-colors">
                         <div className="flex items-start gap-4">
@@ -540,11 +571,11 @@ export const Aprobaciones: React.FC = () => {
               <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
                 <span className="text-xs text-gray-500 mr-1">Estado:</span>
                 <StatusBadge status={selectedRegistro.estado} />
-                {(selectedRegistro as any).validadoPorJefatura ? (
+                {selectedRegistro.validadoPorJefatura ? (
                   <Badge className="bg-green-100 text-green-800 border border-green-300 text-xs">
                     Validado por Jefatura
                   </Badge>
-                ) : selectedRegistro.estado === 'aprobada' ? (
+                ) : selectedRegistro.estado === 'pendiente' ? (
                   <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 text-xs">
                     Pendiente de validación
                   </Badge>
@@ -567,7 +598,7 @@ export const Aprobaciones: React.FC = () => {
             <Button variant="outline" onClick={() => setShowDetalleDialog(false)}>
               Cerrar
             </Button>
-            {selectedRegistro?.estado === 'aprobada' && !(selectedRegistro as any)?.validadoPorJefatura && (
+            {selectedRegistro?.estado === 'pendiente' && (
               <>
                 <Button
                   variant="ghost"

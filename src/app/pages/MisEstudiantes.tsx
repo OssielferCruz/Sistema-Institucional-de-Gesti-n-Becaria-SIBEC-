@@ -4,23 +4,38 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Users, LayoutGrid, List, Search, Mail, GraduationCap, Calendar, Clock, User, BookOpen, Download, Filter } from 'lucide-react';
-import { mockEstudiantes, mockDocentes } from '../data/mockData';
 import { StatusBadge } from '../components/shared/StatusBadge';
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { useAuth } from '../context/AuthContext';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 
 type VistaType = 'cards' | 'tabla';
 
 export const MisEstudiantes: React.FC = () => {
+  const { user } = useAuth();
+  const { mockEstudiantes, mockDocentes, isLoading, error } = useLegacyDataBridge();
   const [vista, setVista] = useState<VistaType>('tabla');
   const [busqueda, setBusqueda] = useState('');
   const [filtroCarrera, setFiltroCarrera] = useState('todas');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [filtroCurso, setFiltroCurso] = useState('todos');
 
-  // Obtener el docente actual (en un caso real vendría del contexto de auth)
-  const docenteActualId = 'doc-1'; // Dr. Roberto Méndez
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando estudiantes...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
+  // Obtener el docente actual desde auth
+  const docenteActualId = user?.docenteId;
   const docenteActual = mockDocentes.find(d => d.id === docenteActualId);
+
+  if (!docenteActual) {
+    return <div className="p-6 text-sm text-gray-500">No se encontró información del docente actual.</div>;
+  }
 
   // Filtrar estudiantes asignados al docente
   const estudiantesAsignados = useMemo(() => {

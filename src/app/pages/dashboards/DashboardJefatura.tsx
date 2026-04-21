@@ -2,12 +2,12 @@ import React from 'react';
 import { Users, Clock, CheckCircle, AlertCircle, TrendingUp, Award, FileText, Target, BookOpen, GraduationCap, Calendar } from 'lucide-react';
 import { KPICard } from '../../components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { mockEstudiantes, mockDocentes, mockRegistrosHoras } from '../../data/mockData';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { Progress } from '../../components/ui/progress';
 import { useAuth } from '../../context/AuthContext';
 import { Badge } from '../../components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { useLegacyDataBridge } from '../../hooks/useLegacyDataBridge';
 
 const CARRERA_COLORS: Record<string, string> = {
   IMS: '#2E7D32',
@@ -25,6 +25,15 @@ const getCarreraColor = (carrera: string) => CARRERA_COLORS[getCarreraCode(carre
 
 export const DashboardJefatura: React.FC = () => {
   const { user } = useAuth();
+  const { mockEstudiantes, mockDocentes, mockRegistrosHoras, isLoading, error } = useLegacyDataBridge();
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando dashboard...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   const carrerasJefe = user?.carrerasAsignadas || (user?.carrera ? [user.carrera] : []);
 

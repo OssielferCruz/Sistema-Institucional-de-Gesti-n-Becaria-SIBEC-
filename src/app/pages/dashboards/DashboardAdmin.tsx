@@ -13,10 +13,22 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 // recharts imports removed from TabResumen — now uses CSSBarChart
-import {
-  mockEstudiantes, mockDocentes, mockRegistrosHoras, areas, carreras,
-  Estudiante, Docente, Subarea
-} from '../../data/mockData';
+import { useLegacyDataBridge } from '../../hooks/useLegacyDataBridge';
+
+type BridgeData = ReturnType<typeof useLegacyDataBridge>;
+type Estudiante = BridgeData['mockEstudiantes'][number];
+type Docente = BridgeData['mockDocentes'][number];
+type RegistroHora = BridgeData['mockRegistrosHoras'][number];
+type Subarea = BridgeData['areas'][number]['subareas'][number];
+type Area = BridgeData['areas'][number];
+
+interface DashboardAdminDataProps {
+  mockEstudiantes: Estudiante[];
+  mockDocentes: Docente[];
+  mockRegistrosHoras: RegistroHora[];
+  areas: Area[];
+  carreras: string[];
+}
 
 // ─── Color maps ───
 const AREA_COLORS: Record<string, string> = {
@@ -61,7 +73,35 @@ function usePagination<T>(items: T[], pageSize: number) {
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════
 export const DashboardAdmin: React.FC = () => {
+  const {
+    areas: bridgeAreas,
+    carreras: bridgeCarreras,
+    mockDocentes: bridgeDocentes,
+    mockEstudiantes: bridgeEstudiantes,
+    mockRegistrosHoras: bridgeRegistros,
+    isLoading,
+    error,
+  } = useLegacyDataBridge();
+
+  const mockEstudiantes = bridgeEstudiantes;
+  const mockDocentes = bridgeDocentes;
+  const mockRegistrosHoras = bridgeRegistros;
+  const areas = bridgeAreas;
+  const carreras = bridgeCarreras;
+
   const [activeTab, setActiveTab] = useState<Tab>('resumen');
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando dashboard...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
+  if (mockEstudiantes.length === 0) {
+    return <div className="p-6 text-sm text-gray-500">No hay datos disponibles para mostrar el dashboard.</div>;
+  }
 
   // ── Global KPIs ──
   const totalEstudiantes = mockEstudiantes.length;
@@ -132,11 +172,33 @@ export const DashboardAdmin: React.FC = () => {
       </div>
 
       {/* ── Tab Content ── */}
-      {activeTab === 'resumen' && <TabResumen />}
-      {activeTab === 'areas' && <TabAreas />}
-      {activeTab === 'docentes' && <TabDocentes />}
-      {activeTab === 'estudiantes' && <TabEstudiantes />}
-      {activeTab === 'registros' && <TabRegistros />}
+      {activeTab === 'resumen' && (
+        <TabResumen
+          mockEstudiantes={mockEstudiantes}
+          mockRegistrosHoras={mockRegistrosHoras}
+        />
+      )}
+      {activeTab === 'areas' && (
+        <TabAreas
+          mockEstudiantes={mockEstudiantes}
+          mockDocentes={mockDocentes}
+          areas={areas}
+        />
+      )}
+      {activeTab === 'docentes' && (
+        <TabDocentes
+          mockEstudiantes={mockEstudiantes}
+          mockDocentes={mockDocentes}
+        />
+      )}
+      {activeTab === 'estudiantes' && (
+        <TabEstudiantes
+          mockEstudiantes={mockEstudiantes}
+          mockDocentes={mockDocentes}
+          mockRegistrosHoras={mockRegistrosHoras}
+        />
+      )}
+      {activeTab === 'registros' && <TabRegistros mockRegistrosHoras={mockRegistrosHoras} />}
     </div>
   );
 };
@@ -222,7 +284,10 @@ const CSSBarChart: React.FC<{ data: CSSBarItem[]; maxValue: number; unit?: strin
 // ═══════════════════════════════════════════════
 // TAB: RESUMEN GENERAL
 // ═══════════════════════════════════════════════
-const TabResumen: React.FC = () => {
+const TabResumen: React.FC<Pick<DashboardAdminDataProps, 'mockEstudiantes' | 'mockRegistrosHoras'>> = ({
+  mockEstudiantes,
+  mockRegistrosHoras,
+}) => {
   // Data by area
   const dataByArea = useMemo(() => {
     const map: Record<string, { id: string; area: string; estudiantes: number; horas: number; fill: string }> = {};
@@ -233,7 +298,7 @@ const TabResumen: React.FC = () => {
       map[a].horas += e.horasCompletadas;
     });
     return Object.values(map).sort((a, b) => b.estudiantes - a.estudiantes);
-  }, []);
+  }, [mockEstudiantes]);
 
   // Data by carrera
   const dataByCarrera = useMemo(() => {
@@ -246,21 +311,21 @@ const TabResumen: React.FC = () => {
     });
     Object.values(map).forEach(d => { d.promedio = Math.round(d.promedio / d.estudiantes); });
     return Object.values(map).sort((a, b) => b.estudiantes - a.estudiantes);
-  }, []);
+  }, [mockEstudiantes]);
 
   // Status pie
   const statusData = useMemo(() => [
     { name: 'Activos', value: mockEstudiantes.filter(e => e.estado === 'activo').length, fill: '#2E7D32' },
     { name: 'Completados', value: mockEstudiantes.filter(e => e.estado === 'completado').length, fill: '#66BB6A' },
     { name: 'Inactivos', value: mockEstudiantes.filter(e => e.estado === 'inactivo').length, fill: '#9E9E9E' },
-  ].filter(d => d.value > 0), []);
+  ].filter(d => d.value > 0), [mockEstudiantes]);
 
   // Registros pie
   const registrosData = useMemo(() => [
     { name: 'Aprobados', value: mockRegistrosHoras.filter(r => r.estado === 'aprobada').length, fill: '#2E7D32' },
     { name: 'Pendientes', value: mockRegistrosHoras.filter(r => r.estado === 'pendiente').length, fill: '#FBC02D' },
     { name: 'Rechazados', value: mockRegistrosHoras.filter(r => r.estado === 'rechazada').length, fill: '#D32F2F' },
-  ].filter(d => d.value > 0), []);
+  ].filter(d => d.value > 0), [mockRegistrosHoras]);
 
   // Estudiantes en riesgo (<30%)
   const enRiesgo = mockEstudiantes.filter(e => e.estado === 'activo' && (e.horasCompletadas / e.horasRequeridas) < 0.3);
@@ -435,7 +500,11 @@ const TabResumen: React.FC = () => {
 // ═══════════════════════════════════════════════
 // TAB: ÁREAS
 // ═══════════════════════════════════════════════
-const TabAreas: React.FC = () => {
+const TabAreas: React.FC<Pick<DashboardAdminDataProps, 'mockEstudiantes' | 'mockDocentes' | 'areas'>> = ({
+  mockEstudiantes,
+  mockDocentes,
+  areas,
+}) => {
   const [selectedArea, setSelectedArea] = useState<string | null>(null);
   const [areaView, setAreaView] = useState<'grid' | 'ranking'>('grid');
   const [expandedDoc, setExpandedDoc] = useState<string | null>(null);
@@ -453,7 +522,7 @@ const TabAreas: React.FC = () => {
       const promedio = estudiantesArea.length > 0 ? Math.round(estudiantesArea.reduce((s, e) => s + (e.horasCompletadas / e.horasRequeridas) * 100, 0) / estudiantesArea.length) : 0;
       return { ...area, docentes: docentesArea, estudiantes: estudiantesArea, horasTotal, horasMeta, activos, completados, enRiesgo, promedio };
     }).filter(a => a.estudiantes.length > 0 || a.docentes.length > 0);
-  }, []);
+  }, [areas, mockDocentes, mockEstudiantes]);
 
   const selectedAreaData = areasData.find(a => a.id === selectedArea);
   const totalBecados = areasData.reduce((s, a) => s + a.estudiantes.length, 0);
@@ -940,11 +1009,14 @@ const TabAreas: React.FC = () => {
 // ═══════════════════════════════════════════════
 // TAB: DOCENTES
 // ═══════════════════════════════════════════════
-const TabDocentes: React.FC = () => {
+const TabDocentes: React.FC<Pick<DashboardAdminDataProps, 'mockEstudiantes' | 'mockDocentes'>> = ({
+  mockEstudiantes,
+  mockDocentes,
+}) => {
   const [searchDoc, setSearchDoc] = useState('');
   const [filterArea, setFilterArea] = useState('');
 
-  const uniqueAreas = useMemo(() => [...new Set(mockDocentes.map(d => d.area))].sort(), []);
+  const uniqueAreas = useMemo(() => [...new Set(mockDocentes.map(d => d.area))].sort(), [mockDocentes]);
 
   const filteredDocentes = useMemo(() => {
     return mockDocentes.filter(d => {
@@ -1054,7 +1126,11 @@ const TabDocentes: React.FC = () => {
 // ═══════════════════════════════════════════════
 // TAB: ESTUDIANTES
 // ═══════════════════════════════════════════════
-const TabEstudiantes: React.FC = () => {
+const TabEstudiantes: React.FC<Pick<DashboardAdminDataProps, 'mockEstudiantes' | 'mockDocentes' | 'mockRegistrosHoras'>> = ({
+  mockEstudiantes,
+  mockDocentes,
+  mockRegistrosHoras,
+}) => {
   const [search, setSearch] = useState('');
   const [filterArea, setFilterArea] = useState('');
   const [filterCarrera, setFilterCarrera] = useState('');
@@ -1065,8 +1141,8 @@ const TabEstudiantes: React.FC = () => {
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
-  const uniqueAreas = useMemo(() => [...new Set(mockEstudiantes.map(e => e.areaActual).filter(Boolean))].sort(), []);
-  const uniqueCarreras = useMemo(() => [...new Set(mockEstudiantes.map(e => getCarreraCode(e.carrera)))].sort(), []);
+  const uniqueAreas = useMemo(() => [...new Set(mockEstudiantes.map(e => e.areaActual).filter(Boolean))].sort(), [mockEstudiantes]);
+  const uniqueCarreras = useMemo(() => [...new Set(mockEstudiantes.map(e => getCarreraCode(e.carrera)))].sort(), [mockEstudiantes]);
 
   const filtered = useMemo(() => {
     let data = mockEstudiantes.filter(e => {
@@ -1539,7 +1615,9 @@ const TabEstudiantes: React.FC = () => {
 // ═══════════════════════════════════════════════
 // TAB: REGISTROS
 // ═══════════════════════════════════════════════
-const TabRegistros: React.FC = () => {
+const TabRegistros: React.FC<Pick<DashboardAdminDataProps, 'mockRegistrosHoras'>> = ({
+  mockRegistrosHoras,
+}) => {
   const [filterEstado, setFilterEstado] = useState('');
   const [searchReg, setSearchReg] = useState('');
 

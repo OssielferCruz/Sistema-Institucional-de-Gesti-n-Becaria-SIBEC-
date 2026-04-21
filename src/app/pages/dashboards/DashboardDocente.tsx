@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { Users, Clock, CheckCircle, Calendar, X, Eye, TrendingUp } from 'lucide-react';
 import { KPICard } from '../../components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { mockEstudiantes, mockRegistrosHoras, mockDocentes } from '../../data/mockData';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { Button } from '../../components/ui/button';
 import { useNavigate } from 'react-router';
 import { Badge } from '../../components/ui/badge';
+import { useAuth } from '../../context/AuthContext';
+import { useLegacyDataBridge } from '../../hooks/useLegacyDataBridge';
 
 // Modal para desglose de información
 interface ModalDesgloseProps {
@@ -291,149 +292,63 @@ const ModalDesglose: React.FC<ModalDesgloseProps> = ({ isOpen, onClose, title, t
 
 export const DashboardDocente: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { mockEstudiantes, mockRegistrosHoras, mockDocentes, isLoading, error } = useLegacyDataBridge();
   const [modalAbierto, setModalAbierto] = useState<string | null>(null);
 
-  // Obtener el docente actual (en un caso real vendría del contexto de auth)
-  const docenteActualId = 'doc-1'; // Dr. Roberto Méndez
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando dashboard...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
+  // Obtener el docente actual desde el contexto/auth
+  const docenteActualId = user?.docenteId;
   const docenteActual = mockDocentes.find(d => d.id === docenteActualId);
+
+  if (!docenteActual) {
+    return <div className="p-6 text-sm text-gray-500">No se encontró información del docente actual.</div>;
+  }
 
   // Filtrar estudiantes asignados al docente
   const estudiantesAsignados = mockEstudiantes.filter(est =>
     docenteActual?.estudiantesAsignados.includes(est.id)
   );
   
-  // Calcular registros de hoy - Usar fechas de ejemplo
-  const hoy = new Date();
-  const hoySemanaActual = new Date(hoy);
-  // Ajustar a la semana actual para tener datos
-  const diaSemana = hoySemanaActual.getDay(); // 0 = domingo, 1 = lunes, etc.
-  hoySemanaActual.setDate(hoySemanaActual.getDate() - diaSemana + 2); // Martes de esta semana
-  
-  const fechaHoyEjemplo = hoySemanaActual.toISOString().split('T')[0];
-  
-  // Crear registros de ejemplo para hoy
-  const registrosHoy = [
-    {
-      id: 'rh-hoy-1',
-      estudianteId: 'est-1',
-      estudianteNombre: 'Juan Carlos Pérez García',
-      docenteId: 'doc-1',
-      docenteNombre: 'Dr. Roberto Méndez',
-      fecha: fechaHoyEjemplo,
-      horaInicio: '08:00',
-      horaFin: '12:00',
-      totalHoras: 4,
-      descripcion: 'Apoyo en organización de archivos académicos y atención a estudiantes',
-      area: 'Asistencia Docente',
-      subarea: 'Jefatura ICE/IEM',
-      carrera: 'ICE - Ingeniería en Cibernética Electrónica',
-      estado: 'pendiente' as const
-    },
-    {
-      id: 'rh-hoy-2',
-      estudianteId: 'est-2',
-      estudianteNombre: 'María Fernanda López Hernández',
-      docenteId: 'doc-1',
-      docenteNombre: 'Dr. Roberto Méndez',
-      fecha: fechaHoyEjemplo,
-      horaInicio: '14:00',
-      horaFin: '18:00',
-      totalHoras: 4,
-      descripcion: 'Actualización de base de datos de estudiantes',
-      area: 'Asistencia Docente',
-      subarea: 'Jefatura ICE/IEM',
-      carrera: 'IEM - Ingeniería Electromédica',
-      estado: 'aprobada' as const,
-      aprobadoPor: 'Dr. Roberto Méndez',
-      fechaAprobacion: fechaHoyEjemplo
-    },
-    {
-      id: 'rh-hoy-3',
-      estudianteId: 'est-16',
-      estudianteNombre: 'Luis Alberto López Ramírez',
-      docenteId: 'doc-1',
-      docenteNombre: 'Dr. Roberto Méndez',
-      fecha: fechaHoyEjemplo,
-      horaInicio: '09:00',
-      horaFin: '13:00',
-      totalHoras: 4,
-      descripcion: 'Preparación de material didáctico para laboratorios',
-      area: 'Asistencia Docente',
-      subarea: 'Jefatura ICE/IEM',
-      carrera: 'ICE - Ingeniería en Cibernética Electrónica',
-      estado: 'aprobada' as const,
-      aprobadoPor: 'Dr. Roberto Méndez',
-      fechaAprobacion: fechaHoyEjemplo
-    }
-  ];
+  const hoy = new Date().toISOString().slice(0, 10);
+
+  const registrosDocente = mockRegistrosHoras.filter(
+    r => r.docenteId === docenteActual.id || docenteActual.estudiantesAsignados.includes(r.estudianteId),
+  );
+
+  // Calcular registros de hoy
+  const registrosHoy = registrosDocente.filter(r => r.fecha === hoy);
   
   const horasRegistradasHoy = registrosHoy.reduce((sum, r) => sum + r.totalHoras, 0);
   
   // Calcular registros de esta semana
   const inicioSemana = new Date();
-  inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+  const day = inicioSemana.getDay() || 7;
+  inicioSemana.setDate(inicioSemana.getDate() - day + 1);
   const finSemana = new Date(inicioSemana);
   finSemana.setDate(finSemana.getDate() + 6);
-  
-  // Crear registros de ejemplo para esta semana
-  const registrosSemana = [
-    ...registrosHoy,
-    {
-      id: 'rh-sem-1',
-      estudianteId: 'est-1',
-      estudianteNombre: 'Juan Carlos Pérez García',
-      docenteId: 'doc-1',
-      docenteNombre: 'Dr. Roberto Méndez',
-      fecha: new Date(inicioSemana.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      horaInicio: '08:00',
-      horaFin: '12:00',
-      totalHoras: 4,
-      descripcion: 'Organización de documentos administrativos',
-      area: 'Asistencia Docente',
-      subarea: 'Jefatura ICE/IEM',
-      carrera: 'ICE - Ingeniería en Cibernética Electrónica',
-      estado: 'aprobada' as const,
-      aprobadoPor: 'Dr. Roberto Méndez',
-      comentario: 'Excelente trabajo en la organización'
-    },
-    {
-      id: 'rh-sem-2',
-      estudianteId: 'est-16',
-      estudianteNombre: 'Luis Alberto López Ramírez',
-      docenteId: 'doc-1',
-      docenteNombre: 'Dr. Roberto Méndez',
-      fecha: new Date(inicioSemana.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      horaInicio: '14:00',
-      horaFin: '18:00',
-      totalHoras: 4,
-      descripcion: 'Atención a estudiantes en ventanilla',
-      area: 'Asistencia Docente',
-      subarea: 'Jefatura ICE/IEM',
-      carrera: 'ICE - Ingeniería en Cibernética Electrónica',
-      estado: 'aprobada' as const,
-      aprobadoPor: 'Dr. Roberto Méndez'
-    }
-  ];
+
+  const registrosSemana = registrosDocente.filter((registro) => {
+    const fechaRegistro = new Date(`${registro.fecha}T00:00:00`);
+    return fechaRegistro >= inicioSemana && fechaRegistro <= finSemana;
+  });
   
   const horasSemana = registrosSemana.reduce((sum, r) => sum + r.totalHoras, 0);
   
-  // Registros aprobados (usar los del mock + ejemplos, evitando duplicados)
-  const registrosAprobadosTodos = [
-    ...mockRegistrosHoras.filter(r => r.estado === 'aprobada'),
-    ...registrosHoy.filter(r => r.estado === 'aprobada'),
-    ...registrosSemana.filter(r => r.estado === 'aprobada')
-  ];
-  
-  // Eliminar duplicados basándose en el ID
-  const registrosAprobados = registrosAprobadosTodos.filter((registro, index, self) =>
-    index === self.findIndex((r) => r.id === registro.id)
-  );
+  // Registros aprobados del docente
+  const registrosAprobados = registrosDocente.filter(r => r.estado === 'aprobada');
   
   const horasAprobadas = registrosAprobados.reduce((sum, r) => sum + r.totalHoras, 0);
 
   // Filtrar registros recientes solo de estudiantes asignados al docente y ordenar por fecha
-  const registrosRecientes = mockRegistrosHoras
-    .filter(r => docenteActual?.estudiantesAsignados.includes(r.estudianteId))
+  const registrosRecientes = registrosDocente
     .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
     .slice(0, 5);
 

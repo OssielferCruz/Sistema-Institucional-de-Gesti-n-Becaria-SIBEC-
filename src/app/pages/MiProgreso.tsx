@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Progress } from '../components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { useAuth } from '../context/AuthContext';
-import { mockEstudiantes, mockRegistrosHoras } from '../data/mockData';
+import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 import { StatusBadge } from '../components/shared/StatusBadge';
 import { Clock, Award, BookOpen, TrendingUp, Calendar, ChevronRight, CheckCircle, ChevronDown, ChevronUp, BarChart3, Activity, AlertCircle, Timer, Target } from 'lucide-react';
 import { Badge } from '../components/ui/badge';
@@ -11,10 +11,23 @@ import { Button } from '../components/ui/button';
 
 export const MiProgreso: React.FC = () => {
   const { user } = useAuth();
+  const { mockEstudiantes, mockRegistrosHoras, isLoading, error } = useLegacyDataBridge();
   const [mesesExpandidos, setMesesExpandidos] = React.useState<Record<string, boolean>>({});
 
-  // Obtener datos del estudiante actual (simulación)
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando progreso...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
+  // Obtener datos del estudiante actual
   const estudiante = mockEstudiantes.find(e => e.email === user?.email) || mockEstudiantes[0];
+  if (!estudiante) {
+    return <div className="p-6 text-sm text-gray-500">No se encontró información del estudiante.</div>;
+  }
+
   const misRegistros = mockRegistrosHoras.filter(r => 
     r.estudianteId === estudiante.id && r.estado === 'aprobada'
   );
