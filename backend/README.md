@@ -1,5 +1,16 @@
 # Backend SIBEC
 
+## Prototipo completo (frontend + backend + db)
+
+Desde la raiz del repositorio:
+
+```
+docker compose -f docker-compose.prototype.yml up --build -d
+```
+
+Frontend: http://localhost:8080
+API: http://localhost:8000/api/v1/
+
 ## Setup rapido
 
 1. Crear entorno virtual

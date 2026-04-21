@@ -3,6 +3,35 @@
 ## Objetivo
 Guia operativa para desplegar frontend + backend en produccion con chequeos minimos.
 
+## Prototipo express para presentacion
+
+1. Levantar stack completo:
+
+```bash
+docker compose -f docker-compose.prototype.yml up --build -d
+```
+
+2. Abrir frontend:
+
+- http://localhost:8080
+
+3. Verificar backend:
+
+- http://localhost:8000/healthz/
+- http://localhost:8000/readyz/
+
+4. Bajar servicios:
+
+```bash
+docker compose -f docker-compose.prototype.yml down
+```
+
+Credenciales demo seed:
+- Admin: admin@sibec.local / Admin123456!
+- Jefatura: jefatura.ice@sibec.local / Demo123456!
+- Docente: docente.iceiem@sibec.local / Demo123456!
+- Estudiante: estudiante.001@sibec.local / Demo123456!
+
 ## Arquitectura recomendada
 - Frontend (Vite build estatico): Vercel o Netlify.
 - Backend (Django + DRF): Render, Railway o VPS.
