@@ -63,3 +63,8 @@ Ejecutar pruebas con coverage:
 
 - GET /healthz/
 - Respuesta esperada: status ok, database up
+
+## Readiness
+
+- GET /readyz/
+- Respuesta esperada: status ready, database up

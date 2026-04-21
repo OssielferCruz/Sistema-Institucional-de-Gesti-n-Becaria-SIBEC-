@@ -206,5 +206,15 @@ def test_student_progress_me_returns_approved_hours(api_client, base_people, aca
 def test_healthcheck_is_public_and_reports_ok(api_client):
     response = api_client.get('/healthz/')
     assert response.status_code == 200
-    assert response.data['status'] == 'ok'
-    assert response.data['database'] == 'up'
+    payload = response.json()
+    assert payload['status'] == 'ok'
+    assert payload['database'] == 'up'
+
+
+@pytest.mark.django_db
+def test_readycheck_is_public_and_reports_ready(api_client):
+    response = api_client.get('/readyz/')
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload['status'] == 'ready'
+    assert payload['database'] == 'up'
