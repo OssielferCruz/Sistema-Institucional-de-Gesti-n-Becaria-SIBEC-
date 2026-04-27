@@ -1215,7 +1215,7 @@ const TabEstudiantes: React.FC<Pick<DashboardAdminDataProps, 'mockEstudiantes' |
               <div className="flex items-center gap-3">
                 {[
                   { label: 'Periodo', value: `${est.periodoActual}/3` },
-                  { label: 'Cuatrimestre', value: est.cuatrimestre },
+                  { label: 'Periodo', value: est.Periodo },
                 ].map(s => (
                   <div key={s.label} className="text-center px-4 py-2 bg-gray-50 rounded-xl">
                     <p className="text-[10px] text-gray-500 uppercase">{s.label}</p>
@@ -1480,9 +1480,9 @@ const TabEstudiantes: React.FC<Pick<DashboardAdminDataProps, 'mockEstudiantes' |
                                 <div className="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-gray-100 flex-1">
                                   <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                   <div>
-                                    <p className="text-[9px] text-gray-400 uppercase">Periodo / Cuatrimestre</p>
+                                    <p className="text-[9px] text-gray-400 uppercase">Periodo / Periodo</p>
                                     <p className="text-gray-700">Periodo {est.periodoActual}/3</p>
-                                    <p className="text-gray-500">Cuatrimestre {est.cuatrimestre}</p>
+                                    <p className="text-gray-500">Periodo {est.Periodo}</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-gray-100 flex-1">

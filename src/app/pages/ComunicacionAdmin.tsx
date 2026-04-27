@@ -9,7 +9,6 @@ import {
   AlertCircle, Crown
 } from 'lucide-react';
 import { useCommunicationDirectory } from '../hooks/useCommunicationDirectory';
-import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 import { formatFullName } from '../utils/communication';
 
 const AREA_COLORS: Record<string, string> = {
@@ -31,17 +30,37 @@ type AdminJefatura = {
   color: string;
 };
 
+type AdminDocente = {
+  id: string;
+  nombre: string;
+  email: string;
+  area: string;
+  subarea?: string;
+  carrerasAsignadas: string[];
+  estudiantesAsignados: string[];
+};
+
+type AdminEstudiante = {
+  id: string;
+  nombre: string;
+  email: string;
+  matricula: string;
+  carrera: string;
+  estado: 'activo' | 'completado' | 'inactivo';
+  areaActual: string;
+  horasCompletadas: number;
+  horasRequeridas: number;
+};
+
 type Tab = 'docentes' | 'jefaturas' | 'estudiantes' | 'masivo';
 
 export const ComunicacionAdmin: React.FC = () => {
   const {
-    mockEstudiantes,
-    mockDocentes,
-    isLoading: isLoadingBridge,
-    error: bridgeError,
-  } = useLegacyDataBridge();
-  const {
+    students,
+    teachers,
     departmentHeads,
+    assignments,
+    hoursLogs,
     isLoading: isLoadingDirectory,
     error: directoryError,
   } = useCommunicationDirectory();
@@ -51,6 +70,79 @@ export const ComunicacionAdmin: React.FC = () => {
   const [filterArea, setFilterArea] = useState('');
   const [filterCarrera, setFilterCarrera] = useState('');
   const [filterEstado, setFilterEstado] = useState('');
+
+  const mockDocentes = useMemo<AdminDocente[]>(() => {
+    const assignmentsByTeacher = new Map<string, typeof assignments>();
+
+    assignments.forEach((assignment) => {
+      const teacherAssignments = assignmentsByTeacher.get(assignment.teacher_profile.id) ?? [];
+      teacherAssignments.push(assignment);
+      assignmentsByTeacher.set(assignment.teacher_profile.id, teacherAssignments);
+    });
+
+    return teachers.map((teacher) => {
+      const teacherAssignments = assignmentsByTeacher.get(teacher.id) ?? [];
+      const firstAssignment = teacherAssignments[0];
+
+      return {
+        id: teacher.id,
+        nombre: formatFullName(teacher.user.first_name, teacher.user.last_name),
+        email: teacher.user.email,
+        area: firstAssignment?.subarea.area.name ?? 'Sin área',
+        subarea: firstAssignment?.subarea.name,
+        carrerasAsignadas: [
+          ...new Set(
+            teacherAssignments.map((assignment) => `${assignment.student.career.code} - ${assignment.student.career.name}`),
+          ),
+        ],
+        estudiantesAsignados: [...new Set(teacherAssignments.map((assignment) => assignment.student.id))],
+      };
+    });
+  }, [teachers, assignments]);
+
+  const mockEstudiantes = useMemo<AdminEstudiante[]>(() => {
+    const assignmentsByStudent = new Map<string, typeof assignments>();
+    const approvedHoursByStudent = new Map<string, number>();
+
+    assignments.forEach((assignment) => {
+      const studentAssignments = assignmentsByStudent.get(assignment.student.id) ?? [];
+      studentAssignments.push(assignment);
+      assignmentsByStudent.set(assignment.student.id, studentAssignments);
+    });
+
+    hoursLogs.forEach((log) => {
+      if (log.status !== 'approved') {
+        return;
+      }
+      const approvedHours = approvedHoursByStudent.get(log.student) ?? 0;
+      approvedHoursByStudent.set(log.student, approvedHours + Number.parseFloat(log.reported_hours));
+    });
+
+    return students.map((student) => {
+      const studentAssignments = assignmentsByStudent.get(student.id) ?? [];
+      const firstAssignment = studentAssignments[0];
+      const horasCompletadas = Math.round(approvedHoursByStudent.get(student.id) ?? 0);
+      const horasRequeridas = Math.round(Number.parseFloat(student.required_annual_hours));
+      const activo = student.is_active && student.scholarship_status.toLowerCase() === 'active';
+      const estado: AdminEstudiante['estado'] = !activo
+        ? 'inactivo'
+        : horasCompletadas >= horasRequeridas
+          ? 'completado'
+          : 'activo';
+
+      return {
+        id: student.id,
+        nombre: formatFullName(student.user.first_name, student.user.last_name),
+        email: student.user.email,
+        matricula: student.student_code,
+        carrera: `${student.career.code} - ${student.career.name}`,
+        estado,
+        areaActual: firstAssignment?.subarea.area.name ?? 'Sin asignar',
+        horasCompletadas,
+        horasRequeridas,
+      };
+    });
+  }, [students, assignments, hoursLogs]);
 
   const mockJefaturas = useMemo<AdminJefatura[]>(() => {
     const CAREER_COLORS: Record<string, string> = {
@@ -90,8 +182,8 @@ export const ComunicacionAdmin: React.FC = () => {
   const generarIniciales = (nombre: string) =>
     nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
-  const uniqueAreas = useMemo(() => [...new Set(mockDocentes.map(d => d.area))].sort(), []);
-  const uniqueCarreras = useMemo(() => [...new Set(mockEstudiantes.map(e => getCarreraCode(e.carrera)))].sort(), []);
+  const uniqueAreas = useMemo(() => [...new Set(mockDocentes.map((d) => d.area))].sort(), [mockDocentes]);
+  const uniqueCarreras = useMemo(() => [...new Set(mockEstudiantes.map((e) => getCarreraCode(e.carrera)))].sort(), [mockEstudiantes]);
 
   const docentesFiltrados = useMemo(() => {
     return mockDocentes.filter(d => {
@@ -166,12 +258,12 @@ export const ComunicacionAdmin: React.FC = () => {
 
   const resetFilters = () => { setBusqueda(''); setFilterArea(''); setFilterCarrera(''); setFilterEstado(''); };
 
-  if (isLoadingBridge || isLoadingDirectory) {
+  if (isLoadingDirectory) {
     return <div className="p-6 text-sm text-gray-500">Cargando comunicación...</div>;
   }
 
-  if (bridgeError || directoryError) {
-    return <div className="p-6 text-sm text-red-600">{bridgeError ?? directoryError}</div>;
+  if (directoryError) {
+    return <div className="p-6 text-sm text-red-600">{directoryError}</div>;
   }
 
   return (

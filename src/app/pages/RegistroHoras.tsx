@@ -10,6 +10,7 @@ import { Clock, Calendar, Save, Search, User, TrendingUp, AlertCircle, CheckCirc
 import { StatusBadge } from '../components/shared/StatusBadge';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
+import { createHoursLog, fetchAssignments } from '../api/portalApi';
 import { useAuth } from '../context/AuthContext';
 import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 
@@ -305,7 +306,7 @@ const ModalEstadisticas: React.FC<ModalEstadisticasProps> = ({ isOpen, onClose, 
 
 export const RegistroHoras: React.FC = () => {
   const { user } = useAuth();
-  const { mockEstudiantes, mockRegistrosHoras, mockDocentes, isLoading, error } = useLegacyDataBridge();
+  const { mockEstudiantes, mockRegistrosHoras, mockDocentes, isLoading, error, refresh } = useLegacyDataBridge();
   const [busquedaEstudiante, setBusquedaEstudiante] = useState('');
   const [selectedEstudiante, setSelectedEstudiante] = useState('');
   const [fecha, setFecha] = useState('');
@@ -316,21 +317,9 @@ export const RegistroHoras: React.FC = () => {
   const [modalAbierto, setModalAbierto] = useState<'hoy' | 'semana' | 'totales' | null>(null);
   const [estudiantesExpandidos, setEstudiantesExpandidos] = useState<Set<string>>(new Set());
 
-  if (isLoading) {
-    return <div className="p-6 text-sm text-gray-500">Cargando registro de horas...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-sm text-red-600">{error}</div>;
-  }
-
   // Obtener el docente actual desde auth
   const docenteActualId = user?.docenteId;
   const docenteActual = mockDocentes.find(d => d.id === docenteActualId);
-
-  if (!docenteActual) {
-    return <div className="p-6 text-sm text-gray-500">No se encontró información del docente actual.</div>;
-  }
 
   // Obtener estudiantes asignados al docente
   const estudiantesAsignados = useMemo(() => {
@@ -354,6 +343,18 @@ export const RegistroHoras: React.FC = () => {
       .slice(0, 5); // Limitar a 5 resultados
   }, [busquedaEstudiante, estudiantesAsignados]);
 
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando registro de horas...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
+  if (!docenteActual) {
+    return <div className="p-6 text-sm text-gray-500">No se encontró información del docente actual.</div>;
+  }
+
   // Obtener datos del estudiante seleccionado
   const estudianteSeleccionado = mockEstudiantes.find(e => e.id === selectedEstudiante);
   
@@ -362,30 +363,26 @@ export const RegistroHoras: React.FC = () => {
     ? mockRegistrosHoras.filter(r => r.estudianteId === selectedEstudiante)
     : [];
   
-  // Datos de ejemplo para hoy (mismo que en el modal)
+  // Registros del docente actual (datos reales del API)
+  const registrosDocente = mockRegistrosHoras.filter(
+    r => r.docenteId === docenteActual.id || docenteActual.estudiantesAsignados.includes(r.estudianteId),
+  );
+
   const hoy = new Date().toISOString().split('T')[0];
-  const registrosHoy = [
-    { totalHoras: 4 },
-    { totalHoras: 4 },
-    { totalHoras: 4 }
-  ];
-  
+  const registrosHoy = registrosDocente.filter(r => r.fecha === hoy);
   const horasRegistradasHoy = registrosHoy.reduce((sum, r) => sum + r.totalHoras, 0);
 
-  // Datos de ejemplo para la semana (mismo que en el modal)
+  // Registros de esta semana
   const inicioSemana = new Date();
-  inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
-  
-  const registrosSemana = [
-    { totalHoras: 4 }, // Hoy - Juan Carlos
-    { totalHoras: 4 }, // Hoy - María Fernanda
-    { totalHoras: 4 }, // Hoy - Luis Alberto
-    { totalHoras: 4 }, // Día anterior - Juan Carlos
-    { totalHoras: 3 }, // Día anterior - María Fernanda
-    { totalHoras: 4 }, // Día anterior - Luis Alberto
-    { totalHoras: 4 }  // Día anterior - Ana Patricia
-  ];
-  
+  const daySemana = inicioSemana.getDay() || 7;
+  inicioSemana.setDate(inicioSemana.getDate() - daySemana + 1);
+  const finSemana = new Date(inicioSemana);
+  finSemana.setDate(finSemana.getDate() + 6);
+
+  const registrosSemana = registrosDocente.filter(r => {
+    const fechaReg = new Date(`${r.fecha}T00:00:00`);
+    return fechaReg >= inicioSemana && fechaReg <= finSemana;
+  });
   const horasRegistradasSemana = registrosSemana.reduce((sum, r) => sum + r.totalHoras, 0);
 
   const calcularHoras = () => {
@@ -406,7 +403,7 @@ export const RegistroHoras: React.FC = () => {
     setMostrarSugerencias(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!selectedEstudiante || !fecha || !horaInicio || !horaFin || !descripcion) {
@@ -419,7 +416,39 @@ export const RegistroHoras: React.FC = () => {
       return;
     }
 
-    toast.success(`✓ Registro guardado: ${totalHoras} horas para ${estudianteSeleccionado?.nombre}`);
+    try {
+      const assignments = await fetchAssignments();
+      const assignment = assignments.find(
+        (item) =>
+          item.student.id === selectedEstudiante &&
+          item.teacher_profile.id === docenteActual.id &&
+          item.status === 'active',
+      );
+
+      if (!assignment) {
+        toast.error('No existe una asignación activa para este estudiante y docente');
+        return;
+      }
+
+      await createHoursLog({
+        student: assignment.student.id,
+        assignment: assignment.id,
+        teacher_profile: assignment.teacher_profile.id,
+        term: assignment.term.id,
+        work_date: fecha,
+        start_time: `${horaInicio}:00`,
+        end_time: `${horaFin}:00`,
+        reported_hours: String(totalHoras),
+        description: descripcion,
+      });
+
+      await refresh();
+      toast.success(`✓ Registro guardado: ${totalHoras} horas para ${estudianteSeleccionado?.nombre}`);
+    } catch (submitError) {
+      const message = submitError instanceof Error ? submitError.message : 'No fue posible guardar el registro';
+      toast.error(message);
+      return;
+    }
     
     // Reset form
     setSelectedEstudiante('');

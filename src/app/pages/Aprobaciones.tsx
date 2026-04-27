@@ -29,21 +29,20 @@ export const Aprobaciones: React.FC = () => {
 
   const carrerasJefe = user?.carrerasAsignadas || (user?.carrera ? [user.carrera] : []);
 
-  // Solo registros de estudiantes asignados a "Asistencia Docente" Y de las carreras del jefe
+  // Registros de estudiantes de las carreras del jefe
   const registrosCarrera = useMemo(() =>
     mockRegistrosHoras.filter(r => {
       const estudiante = mockEstudiantes.find(e => e.id === r.estudianteId);
       return estudiante 
-        && carrerasJefe.includes(estudiante.carrera)
-        && estudiante.areaActual === 'Asistencia Docente';
+        && carrerasJefe.includes(estudiante.carrera);
     }),
     [mockRegistrosHoras, mockEstudiantes, carrerasJefe]
   );
 
-  // Estudiantes de Asistencia Docente de las carreras del jefe (para contexto)
+  // Estudiantes de las carreras del jefe (para contexto)
   const estudiantesAsistencia = useMemo(() =>
     mockEstudiantes.filter(e =>
-      carrerasJefe.includes(e.carrera) && e.areaActual === 'Asistencia Docente'
+      carrerasJefe.includes(e.carrera)
     ),
     [mockEstudiantes, carrerasJefe]
   );

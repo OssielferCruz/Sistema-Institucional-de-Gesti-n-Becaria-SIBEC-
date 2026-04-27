@@ -88,6 +88,21 @@ export interface TeacherProfileApiResponse {
   updated_at: string;
 }
 
+
+export interface StudentProfileApiResponse {
+  id: string;
+  student_code: string;
+  user: ApiUserSummary;
+  career: CareerApiResponse;
+  study_plan: StudyPlanApiResponse;
+  admission_year: number;
+  scholarship_status: string;
+  required_annual_hours: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DepartmentHeadProfileApiResponse {
   id: string;
   user: ApiUserSummary;
@@ -192,6 +207,18 @@ export interface HoursLogApiResponse {
   locked_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface CreateHoursLogPayload {
+  student: string;
+  assignment: string;
+  teacher_profile: string;
+  term: string;
+  work_date: string;
+  start_time: string;
+  end_time: string;
+  reported_hours: string;
+  description: string;
 }
 
 function getAccessToken(): string | null {
@@ -413,10 +440,108 @@ export async function fetchStudentHoursLogs(): Promise<HoursLogApiResponse[]> {
   return fetchAllPages<HoursLogApiResponse>('/api/v1/hours-logs/');
 }
 
+export async function createHoursLog(payload: CreateHoursLogPayload): Promise<HoursLogApiResponse> {
+  return authMutation<HoursLogApiResponse>('/api/v1/hours-logs/', 'POST', payload);
+}
+
 export async function approveHoursLog(hoursLogId: string, comments = ''): Promise<HoursLogApiResponse> {
   return authMutation<HoursLogApiResponse>(`/api/v1/hours-logs/${hoursLogId}/approve/`, 'POST', { comments });
 }
 
 export async function rejectHoursLog(hoursLogId: string, comments: string): Promise<HoursLogApiResponse> {
   return authMutation<HoursLogApiResponse>(`/api/v1/hours-logs/${hoursLogId}/reject/`, 'POST', { comments });
+}
+
+// ─── User Management API ───
+
+export interface CreateUserPayload {
+  email: string;
+  first_name: string;
+  last_name: string;
+  password: string;
+  role_id: string;
+}
+
+export interface RoleApiResponse {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  is_active: boolean;
+}
+
+export interface TermApiResponse {
+  id: string;
+  academic_year: number;
+  sequence_number: number;
+  name: string;
+  start_date: string;
+  end_date: string;
+  is_closed: boolean;
+}
+
+export async function fetchUsers(): Promise<ApiUserSummary[]> {
+  const resp = await authRequest<ApiUserSummary[] | PaginatedResponse<ApiUserSummary>>('/api/v1/users/');
+  return Array.isArray(resp) ? resp : resp.results;
+}
+
+export async function fetchRoles(): Promise<RoleApiResponse[]> {
+  return fetchAllPages<RoleApiResponse>('/api/v1/roles/');
+}
+
+export async function fetchCareers(): Promise<CareerApiResponse[]> {
+  return fetchAllPages<CareerApiResponse>('/api/v1/careers/');
+}
+
+export async function fetchStudyPlans(): Promise<StudyPlanApiResponse[]> {
+  return fetchAllPages<StudyPlanApiResponse>('/api/v1/study-plans/');
+}
+
+export async function fetchTerms(): Promise<TermApiResponse[]> {
+  return fetchAllPages<TermApiResponse>('/api/v1/terms/');
+}
+
+export async function createUser(payload: CreateUserPayload): Promise<ApiUserSummary> {
+  return authMutation<ApiUserSummary>('/api/v1/users/', 'POST', payload);
+}
+
+export interface CreateStudentPayload {
+  user_id: string;
+  student_code: string;
+  career_id: string;
+  study_plan_id: string;
+  admission_year: number;
+}
+
+export async function createStudent(payload: CreateStudentPayload): Promise<StudentProfileApiResponse> {
+  return authMutation<StudentProfileApiResponse>('/api/v1/students/', 'POST', payload);
+}
+
+export interface CreateTeacherPayload {
+  user_id: string;
+  employee_code?: string;
+}
+
+export async function createTeacher(payload: CreateTeacherPayload): Promise<TeacherProfileApiResponse> {
+  return authMutation<TeacherProfileApiResponse>('/api/v1/teachers/', 'POST', payload);
+}
+
+export interface CreateDepartmentHeadPayload {
+  user_id: string;
+  career_id: string;
+}
+
+export async function createDepartmentHead(payload: CreateDepartmentHeadPayload): Promise<DepartmentHeadProfileApiResponse> {
+  return authMutation<DepartmentHeadProfileApiResponse>('/api/v1/department-heads/', 'POST', payload);
+}
+
+export interface CreateAssignmentPayload {
+  student_id: string;
+  subarea_id: string;
+  teacher_profile_id: string;
+  term_id: string;
+}
+
+export async function createAssignment(payload: CreateAssignmentPayload): Promise<AssignmentApiResponse> {
+  return authMutation<AssignmentApiResponse>('/api/v1/assignments/', 'POST', payload);
 }

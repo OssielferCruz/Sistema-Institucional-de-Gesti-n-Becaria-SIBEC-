@@ -218,3 +218,43 @@ def test_readycheck_is_public_and_reports_ready(api_client):
     payload = response.json()
     assert payload['status'] == 'ready'
     assert payload['database'] == 'up'
+
+
+@pytest.mark.django_db
+def test_teacher_log_is_visible_to_student_and_updates_after_head_approval(api_client, base_people, academic_base):
+    api_client.force_authenticate(user=base_people['teacher_user_1'])
+    payload = {
+        'student': str(base_people['student'].id),
+        'assignment': str(base_people['assignment'].id),
+        'teacher_profile': str(base_people['teacher_1'].id),
+        'term': str(academic_base['term'].id),
+        'work_date': '2026-02-12',
+        'start_time': '09:00:00',
+        'end_time': '11:00:00',
+        'reported_hours': '2.00',
+        'description': 'Seguimiento de avance semanal',
+    }
+
+    create_response = api_client.post('/api/v1/hours-logs/', payload, format='json')
+    assert create_response.status_code == 201
+    created_log_id = create_response.data['id']
+
+    api_client.force_authenticate(user=base_people['student_user'])
+    student_logs_response = api_client.get('/api/v1/hours-logs/')
+    assert student_logs_response.status_code == 200
+    returned_ids = [item['id'] for item in student_logs_response.data['results']]
+    assert created_log_id in returned_ids
+
+    api_client.force_authenticate(user=base_people['head_ok_user'])
+    approve_response = api_client.post(
+        f"/api/v1/hours-logs/{created_log_id}/approve/",
+        {'comments': 'Validado por jefatura'},
+        format='json',
+    )
+    assert approve_response.status_code == 200
+    assert approve_response.data['status'] == 'approved'
+
+    api_client.force_authenticate(user=base_people['student_user'])
+    progress_response = api_client.get('/api/v1/progress/me/')
+    assert progress_response.status_code == 200
+    assert Decimal(str(progress_response.data['approved_hours'])) == Decimal('2.00')

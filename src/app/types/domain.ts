@@ -10,11 +10,12 @@ export interface Estudiante {
   horasCompletadasPeriodo: number;
   periodoActual: 1 | 2 | 3;
   estado: 'activo' | 'inactivo' | 'completado';
+  planEstudio: 'Cuatrimestral' | 'Trimestral';
   areaActual?: string;
   subarea?: string;
   docenteResponsableId?: string;
   docenteResponsable?: string;
-  cuatrimestre: string;
+  periodo: string;
   cursoAsignado?: string;
 }
 

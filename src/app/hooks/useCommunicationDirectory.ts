@@ -8,8 +8,10 @@ import {
   fetchAssignments,
   fetchAreas,
   fetchDepartmentHeads,
+  fetchStudentHoursLogs,
   fetchStudents,
   fetchTeachers,
+  HoursLogApiResponse,
   StudentProfileApiResponse,
   TeacherProfileApiResponse,
 } from '../api/portalApi';
@@ -20,6 +22,7 @@ export interface CommunicationDirectoryData {
   departmentHeads: DepartmentHeadProfileApiResponse[];
   assignments: AssignmentApiResponse[];
   areas: AreaApiResponse[];
+  hoursLogs: HoursLogApiResponse[];
   currentStudent: StudentProfileApiResponse | null;
   currentTeacher: TeacherProfileApiResponse | null;
   currentDepartmentHead: DepartmentHeadProfileApiResponse | null;
@@ -34,6 +37,7 @@ export function useCommunicationDirectory(): CommunicationDirectoryData {
   const [departmentHeads, setDepartmentHeads] = useState<DepartmentHeadProfileApiResponse[]>([]);
   const [assignments, setAssignments] = useState<AssignmentApiResponse[]>([]);
   const [areas, setAreas] = useState<AreaApiResponse[]>([]);
+  const [hoursLogs, setHoursLogs] = useState<HoursLogApiResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,12 +49,13 @@ export function useCommunicationDirectory(): CommunicationDirectoryData {
         setIsLoading(true);
         setError(null);
 
-        const [studentsResponse, teachersResponse, departmentHeadsResponse, assignmentsResponse, areasResponse] = await Promise.all([
+        const [studentsResponse, teachersResponse, departmentHeadsResponse, assignmentsResponse, areasResponse, hoursLogsResponse] = await Promise.all([
           fetchStudents(),
           fetchTeachers(),
           fetchDepartmentHeads(),
           fetchAssignments(),
           fetchAreas(),
+          fetchStudentHoursLogs(),
         ]);
 
         if (!mounted) {
@@ -62,6 +67,7 @@ export function useCommunicationDirectory(): CommunicationDirectoryData {
         setDepartmentHeads(departmentHeadsResponse);
         setAssignments(assignmentsResponse);
         setAreas(areasResponse);
+        setHoursLogs(hoursLogsResponse);
       } catch (loadError) {
         if (!mounted) {
           return;
@@ -112,6 +118,7 @@ export function useCommunicationDirectory(): CommunicationDirectoryData {
     departmentHeads,
     assignments,
     areas,
+    hoursLogs,
     currentStudent,
     currentTeacher,
     currentDepartmentHead,

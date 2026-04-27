@@ -103,43 +103,43 @@ export default function Login() {
 
             {/* Quick Login Demo Buttons */}
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-500 mb-3 text-center">Demo: Acceso rápido por rol</p>
+              <p className="text-sm text-gray-500 mb-3 text-center">Usuarios Semilla Registrados (Demo)</p>
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('admin@sibec.local', 'Admin123456!')}
+                  onClick={() => quickLogin('bienestar.estudiantil@ulsa.edu.ni', 'Admin123456!')}
                   className="text-xs"
                 >
-                  Admin
+                  Admin (Bienestar)
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('jefatura.ice@sibec.local', 'Demo123456!')}
+                  onClick={() => quickLogin('jefatura.ice@ulsa.edu.ni', 'Demo123456!')}
                   className="text-xs"
                 >
-                  Jefatura
+                  Jefatura ICE
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('docente.iceiem@sibec.local', 'Demo123456!')}
+                  onClick={() => quickLogin('roberto.mendez@ac.ulsa.edu.ni', 'Demo123456!')}
                   className="text-xs"
                 >
-                  Docente
+                  Docente (R. Mendez)
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('estudiante.001@sibec.local', 'Demo123456!')}
+                  onClick={() => quickLogin('juan.perez@est.ulsa.edu.ni', 'Demo123456!')}
                   className="text-xs"
                 >
-                  Estudiante
+                  Estudiante (J. Perez)
                 </Button>
               </div>
-              <p className="text-xs text-gray-400 mt-2 text-center">
-                Admin: Admin123456! | Otros roles: Demo123456!
+              <p className="text-xs text-gray-400 mt-3 text-center">
+                El sistema detecta automáticamente el rol según la base de datos.
               </p>
             </div>
           </CardContent>

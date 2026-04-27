@@ -498,8 +498,8 @@ const TabGestion: React.FC<{
                   <Input type="number" value={editingStudent.horasRequeridas} onChange={e => setEditingStudent({ ...editingStudent, horasRequeridas: Number(e.target.value) })} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Cuatrimestre</Label>
-                  <Input value={editingStudent.cuatrimestre} onChange={e => setEditingStudent({ ...editingStudent, cuatrimestre: e.target.value })} />
+                  <Label className="text-xs">Periodo</Label>
+                  <Input value={editingStudent.Periodo} onChange={e => setEditingStudent({ ...editingStudent, Periodo: e.target.value })} />
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-2">
@@ -539,7 +539,7 @@ const TabAgregar: React.FC<{
   mockDocentes: Docente[];
 }> = ({ estudiantes, setEstudiantes, carreras, areas, mockDocentes }) => {
   const [form, setForm] = useState({
-    nombre: '', matricula: '', carrera: carreras[0], email: '', cuatrimestre: 'ENE-ABR 2026',
+    nombre: '', matricula: '', carrera: carreras[0], email: '', Periodo: 'ENE-ABR 2026',
     areaActual: '', subarea: '', docenteResponsableId: '', cursoAsignado: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -588,12 +588,12 @@ const TabAgregar: React.FC<{
       subarea: form.subarea || undefined,
       docenteResponsableId: form.docenteResponsableId || undefined,
       docenteResponsable: docente?.nombre || undefined,
-      cuatrimestre: form.cuatrimestre,
+      Periodo: form.Periodo,
       cursoAsignado: form.cursoAsignado || undefined,
     };
     setEstudiantes(prev => [...prev, newStudent]);
     toast.success(`Estudiante ${form.nombre} registrado exitosamente`);
-    setForm({ nombre: '', matricula: '', carrera: carreras[0], email: '', cuatrimestre: 'ENE-ABR 2026', areaActual: '', subarea: '', docenteResponsableId: '', cursoAsignado: '' });
+    setForm({ nombre: '', matricula: '', carrera: carreras[0], email: '', Periodo: 'ENE-ABR 2026', areaActual: '', subarea: '', docenteResponsableId: '', cursoAsignado: '' });
     setErrors({});
   };
 
@@ -683,8 +683,8 @@ const TabAgregar: React.FC<{
                 <Calendar className="w-3.5 h-3.5 text-[#2E7D32]" /> Periodo Académico
               </p>
               <div className="space-y-1.5 max-w-xs">
-                <Label className="text-xs">Cuatrimestre</Label>
-                <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" value={form.cuatrimestre} onChange={e => setForm({ ...form, cuatrimestre: e.target.value })}>
+                <Label className="text-xs">Periodo</Label>
+                <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white" value={form.Periodo} onChange={e => setForm({ ...form, Periodo: e.target.value })}>
                   <option value="ENE-ABR 2026">ENE-ABR 2026</option>
                   <option value="MAY-AGO 2026">MAY-AGO 2026</option>
                   <option value="SEP-DIC 2026">SEP-DIC 2026</option>
@@ -696,7 +696,7 @@ const TabAgregar: React.FC<{
               <Button className="bg-[#2E7D32] hover:bg-[#1B5E20] gap-1.5" onClick={handleSubmit}>
                 <UserPlus className="w-4 h-4" /> Registrar Estudiante
               </Button>
-              <Button variant="outline" onClick={() => { setForm({ nombre: '', matricula: '', carrera: carreras[0], email: '', cuatrimestre: 'ENE-ABR 2026', areaActual: '', subarea: '', docenteResponsableId: '', cursoAsignado: '' }); setErrors({}); }}>
+              <Button variant="outline" onClick={() => { setForm({ nombre: '', matricula: '', carrera: carreras[0], email: '', Periodo: 'ENE-ABR 2026', areaActual: '', subarea: '', docenteResponsableId: '', cursoAsignado: '' }); setErrors({}); }}>
                 Limpiar Formulario
               </Button>
             </div>
@@ -844,7 +844,7 @@ const TabImportar: React.FC = () => {
                       <th className="py-2.5 px-3 text-left text-gray-500 font-medium">Nombre</th>
                       <th className="py-2.5 px-3 text-left text-gray-500 font-medium">Carrera</th>
                       <th className="py-2.5 px-3 text-left text-gray-500 font-medium">Email</th>
-                      <th className="py-2.5 px-3 text-left text-gray-500 font-medium">Cuatrimestre</th>
+                      <th className="py-2.5 px-3 text-left text-gray-500 font-medium">Periodo</th>
                       <th className="py-2.5 px-3 text-left text-gray-500 font-medium">Estado</th>
                     </tr>
                   </thead>
@@ -876,7 +876,7 @@ const TabImportar: React.FC = () => {
           <CardContent className="p-4 space-y-3">
             <p className="text-xs text-gray-600">El archivo Excel debe contener las siguientes columnas en orden:</p>
             <div className="space-y-1.5">
-              {['Matrícula', 'Nombre Completo', 'Carrera', 'Correo Electrónico', 'Cuatrimestre'].map((col, i) => (
+              {['Matrícula', 'Nombre Completo', 'Carrera', 'Correo Electrónico', 'Periodo'].map((col, i) => (
                 <div key={col} className="flex items-center gap-2 text-xs p-2 bg-gray-50 rounded-lg">
                   <span className="w-5 h-5 rounded-full bg-[#2E7D32] text-white flex items-center justify-center text-[9px] font-bold">{i + 1}</span>
                   <span className="text-gray-700">{col}</span>

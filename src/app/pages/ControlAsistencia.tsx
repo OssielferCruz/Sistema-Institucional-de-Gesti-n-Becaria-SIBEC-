@@ -156,8 +156,9 @@ const ModalDetallesDia: React.FC<ModalDetallesDiaProps> = ({ isOpen, onClose, es
 export const ControlAsistencia: React.FC = () => {
   const { user } = useAuth();
   const { mockEstudiantes, mockDocentes, mockRegistrosHoras, isLoading, error } = useLegacyDataBridge();
-  const [semanaActual, setSemanaActual] = useState(12);
+  const [semanaActual, setSemanaActual] = useState(1);
   const [busquedaEstudiante, setBusquedaEstudiante] = useState('');
+  const [filtroPlan, setFiltroPlan] = useState<'Todos' | 'Cuatrimestral' | 'Trimestral'>('Todos');
   const [modalAbierto, setModalAbierto] = useState(false);
   const [diaSeleccionado, setDiaSeleccionado] = useState<any>(null);
   const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<any>(null);
@@ -195,8 +196,12 @@ export const ControlAsistencia: React.FC = () => {
     // Rol no reconocido
   }
 
-  // Filtrar estudiantes por búsqueda
+  // Filtrar estudiantes por búsqueda y plan
   const estudiantesFiltrados = estudiantesAsignados.filter(e => {
+    // Filtro por plan de estudio
+    if (filtroPlan !== 'Todos' && e.planEstudio !== filtroPlan) return false;
+
+    // Filtro por texto
     if (!busquedaEstudiante) return true;
     const busqueda = busquedaEstudiante.toLowerCase();
     return (
@@ -205,6 +210,13 @@ export const ControlAsistencia: React.FC = () => {
       e.areaActual.toLowerCase().includes(busqueda)
     );
   });
+
+  // Limitar número de semanas mostradas según el plan seleccionado
+  const maxSemanas = filtroPlan === 'Trimestral' ? 11 : 15;
+  if (semanaActual > maxSemanas) {
+    setSemanaActual(maxSemanas);
+  }
+  const arraySemanas = Array.from({ length: maxSemanas }, (_, i) => i + 1);
 
   // Función para generar fechas de una semana específica (lunes a viernes)
   const obtenerDiasSemana = (numeroSemana: number) => {
@@ -299,8 +311,8 @@ export const ControlAsistencia: React.FC = () => {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => setSemanaActual(Math.min(12, semanaActual + 1))}
-                disabled={semanaActual === 12}
+                onClick={() => setSemanaActual(Math.min(maxSemanas, semanaActual + 1))}
+                disabled={semanaActual === maxSemanas}
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -308,6 +320,16 @@ export const ControlAsistencia: React.FC = () => {
 
             {/* Filtro de estudiante */}
             <div className="flex items-center gap-2">
+              <select
+                value={filtroPlan}
+                onChange={(e) => setFiltroPlan(e.target.value as any)}
+                className="border border-gray-300 rounded-md text-sm px-3 py-2 text-gray-700 bg-white"
+              >
+                <option value="Todos">Plan: Todos</option>
+                <option value="Cuatrimestral">Plan: Cuatrimestral</option>
+                <option value="Trimestral">Plan: Trimestral</option>
+              </select>
+
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
@@ -331,7 +353,7 @@ export const ControlAsistencia: React.FC = () => {
 
           {/* Indicador de semanas */}
           <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-2">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(num => (
+            {arraySemanas.map(num => (
               <button
                 key={num}
                 onClick={() => setSemanaActual(num)}
@@ -367,7 +389,7 @@ export const ControlAsistencia: React.FC = () => {
                     <div className="flex items-center justify-between w-full pr-4">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#2E7D32] to-[#66BB6A] flex items-center justify-center text-white font-bold">
-                          {estudiante.nombre.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                          {estudiante.nombre.split(' ').map((n: string) => n[0]).join('').substring(0, 2)}
                         </div>
                         <div className="text-left">
                           <div className="flex items-center gap-2">
@@ -415,6 +437,12 @@ export const ControlAsistencia: React.FC = () => {
                   <AccordionContent>
                     <div className="px-3 pb-4 pt-2">
                       {/* Calendario semanal */}
+                      {estudiante.planEstudio === 'Trimestral' && semanaActual > 11 ? (
+                        <div className="text-center p-6 text-gray-500 bg-gray-50 rounded-lg border border-gray-200 mb-4">
+                          <CheckCircle2 className="w-8 h-8 mx-auto text-green-500 mb-2" />
+                          <p>Este estudiante pertenece al plan Trimestral y ya no tiene actividades programadas en esta semana lectiva.</p>
+                        </div>
+                      ) : (
                       <div className="grid grid-cols-5 gap-3 mb-4">
                         {diasSemana.map((dia, index) => {
                           const registros = obtenerRegistrosPorFecha(estudiante.id, dia.fecha);
@@ -496,6 +524,7 @@ export const ControlAsistencia: React.FC = () => {
                           );
                         })}
                       </div>
+                      )}
 
                       {/* Resumen de registros de la semana */}
                       {estadisticas.diasAsistidos > 0 && (

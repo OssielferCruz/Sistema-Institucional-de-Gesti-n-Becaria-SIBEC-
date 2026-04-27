@@ -342,9 +342,9 @@ export const DocentesSubordinados: React.FC = () => {
                             </div>
                             <div className="bg-white rounded-xl border border-gray-100 p-3">
                               <p className="text-xs text-gray-500 mb-1 flex items-center gap-1">
-                                <Calendar className="w-3 h-3" /> Cuatrimestre
+                                <Calendar className="w-3 h-3" /> Periodo
                               </p>
-                              <p className="text-sm font-medium text-gray-800">{estudiante.cuatrimestre}</p>
+                              <p className="text-sm font-medium text-gray-800">{estudiante.Periodo}</p>
                             </div>
                           </div>
 
@@ -356,7 +356,7 @@ export const DocentesSubordinados: React.FC = () => {
                                 Periodo Actual
                               </p>
                               <Badge variant="outline" className="text-[#2E7D32] border-[#2E7D32] text-xs">
-                                {estudiante.cuatrimestre} · Periodo {(() => {
+                                {estudiante.Periodo} · Periodo {(() => {
                                   if (estudiante.horasCompletadas <= 50) return 1;
                                   if (estudiante.horasCompletadas <= 100) return 2;
                                   return 3;

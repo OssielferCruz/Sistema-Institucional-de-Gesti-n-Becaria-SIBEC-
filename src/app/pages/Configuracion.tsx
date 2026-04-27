@@ -17,7 +17,7 @@ import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
 import { toast } from 'sonner';
 
 let areas: any[] = [];
-let cuatrimestres: string[] = [];
+let Periodos: string[] = [];
 let mockDocentes: any[] = [];
 let mockEstudiantes: any[] = [];
 let carreras: string[] = [];
@@ -80,7 +80,7 @@ const defaultConfig: SistemConfig = {
 export const Configuracion: React.FC = () => {
   const {
     areas: bridgeAreas,
-    cuatrimestres: bridgeCuatrimestres,
+    Periodos: bridgePeriodos,
     mockDocentes: bridgeDocentes,
     mockEstudiantes: bridgeEstudiantes,
     carreras: bridgeCarreras,
@@ -89,7 +89,7 @@ export const Configuracion: React.FC = () => {
   } = useLegacyDataBridge();
 
   areas = bridgeAreas;
-  cuatrimestres = bridgeCuatrimestres;
+  Periodos = bridgePeriodos;
   mockDocentes = bridgeDocentes;
   mockEstudiantes = bridgeEstudiantes;
   carreras = bridgeCarreras;
@@ -103,14 +103,6 @@ export const Configuracion: React.FC = () => {
   const [isAreaDialogOpen, setIsAreaDialogOpen] = useState(false);
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
-
-  if (isLoading) {
-    return <div className="p-6 text-sm text-gray-500">Cargando configuración...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-sm text-red-600">{error}</div>;
-  }
 
   const totalUsuarios = mockUsuarios.length;
   const usuariosActivos = mockUsuarios.filter(u => u.activo).length;
@@ -151,6 +143,14 @@ export const Configuracion: React.FC = () => {
     { id: 'p2', nombre: 'Periodo 2', rango: 'MAY-AGO 2026', horas: 50, estado: 'pendiente' as const, inicio: '2026-05-11', fin: '2026-08-28' },
     { id: 'p3', nombre: 'Periodo 3', rango: 'SEP-DIC 2026', horas: 50, estado: 'pendiente' as const, inicio: '2026-09-07', fin: '2026-12-18' },
   ];
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando configuración...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   return (
     <div className="space-y-5">
@@ -636,7 +636,7 @@ const TabAreas: React.FC<{
 // TAB: PERIODOS
 // ═══════════════════════════════════════════════
 const TabPeriodos: React.FC<{ periodos: { id: string; nombre: string; rango: string; horas: number; estado: 'activo' | 'pendiente'; inicio: string; fin: string }[]; config: SistemConfig }> = ({ periodos, config }) => {
-  const cuatActual = cuatrimestres.indexOf(config.periodoActual);
+  const cuatActual = Periodos.indexOf(config.periodoActual);
 
   return (
     <div className="space-y-4">
@@ -713,16 +713,16 @@ const TabPeriodos: React.FC<{ periodos: { id: string; nombre: string; rango: str
         </CardContent>
       </Card>
 
-      {/* Cuatrimestres históricos */}
+      {/* Periodos históricos */}
       <Card className="bg-white border-none shadow-sm">
         <CardHeader className="border-b bg-gradient-to-r from-[#E8F5E9] to-white pb-3 pt-4 px-5">
           <CardTitle className="text-[#2E7D32] flex items-center gap-2 text-base">
-            <Clock className="w-4 h-4" /> Cuatrimestres Disponibles
+            <Clock className="w-4 h-4" /> Periodos Disponibles
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {cuatrimestres.map((c, i) => {
+            {Periodos.map((c, i) => {
               const isCurrent = c === config.periodoActual;
               const isPast = i < cuatActual;
               return (
@@ -960,7 +960,7 @@ const TabSistema: React.FC<{ config: SistemConfig; toggleConfig: (key: keyof Sis
               { label: 'Áreas', value: areas.length, color: '#6A1B9A' },
               { label: 'Carreras', value: carreras.length, color: '#EF6C00' },
               { label: 'Subáreas', value: areas.reduce((s, a) => s + (a.subareas?.length || 0), 0), color: '#00838F' },
-              { label: 'Cuatrimestres', value: cuatrimestres.length, color: '#F57F17' },
+              { label: 'Periodos', value: Periodos.length, color: '#F57F17' },
             ].map(stat => (
               <div key={stat.label} className="text-center p-3 bg-gray-50 rounded-xl border border-gray-100">
                 <p className="text-2xl font-bold" style={{ color: stat.color }}>{stat.value}</p>
