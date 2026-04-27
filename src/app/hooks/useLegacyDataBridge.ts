@@ -4,11 +4,13 @@ import {
   fetchAreas,
   fetchStudentAssignments,
   fetchStudentHoursLogs,
+  fetchStudents,
   fetchSubareas,
   fetchTeachers,
   type AssignmentApiResponse,
   type AreaApiResponse,
   type HoursLogApiResponse,
+  type StudentProfileApiResponse,
   type SubareaApiResponse,
   type TeacherProfileApiResponse,
 } from '../api/portalApi';
@@ -22,7 +24,7 @@ export type RegistroHoraExtended = RegistroHora & {
 export interface LegacyDataBridgeResult {
   areas: Area[];
   carreras: string[];
-  cuatrimestres: string[];
+  Periodos: string[];
   mockDocentes: Docente[];
   mockEstudiantes: Estudiante[];
   mockRegistrosHoras: RegistroHoraExtended[];
@@ -37,6 +39,7 @@ interface LegacyPayload {
   assignments: AssignmentApiResponse[];
   logs: HoursLogApiResponse[];
   teachers: TeacherProfileApiResponse[];
+  students: StudentProfileApiResponse[];
 }
 
 function fullName(firstName?: string, lastName?: string): string {
@@ -49,7 +52,7 @@ function toCareerLabel(code: string, name: string): string {
 }
 
 function mapLegacy(payload: LegacyPayload): Omit<LegacyDataBridgeResult, 'isLoading' | 'error' | 'refresh'> {
-  const { areas, subareas, assignments, logs, teachers } = payload;
+  const { areas, subareas, assignments, logs, teachers, students } = payload;
 
   const assignmentsByTeacher = new Map<string, AssignmentApiResponse[]>();
   const assignmentsByStudent = new Map<string, AssignmentApiResponse[]>();
@@ -106,37 +109,39 @@ function mapLegacy(payload: LegacyPayload): Omit<LegacyDataBridgeResult, 'isLoad
     })
     .sort((left, right) => left.nombre.localeCompare(right.nombre));
 
-  const mockEstudiantes: Estudiante[] = Array.from(assignmentsByStudent.entries())
-    .map(([studentId, studentAssignments]) => {
+  const mockEstudiantes: Estudiante[] = students
+    .map((student) => {
+      const studentAssignments = assignmentsByStudent.get(student.id) ?? [];
       const assignment = studentAssignments[0];
       const approvedHours = logs
-        .filter((log) => log.student === studentId && log.status === 'approved')
+        .filter((log) => log.student === student.id && log.status === 'approved')
         .reduce((sum, log) => sum + Number.parseFloat(log.reported_hours), 0);
 
       const requiredHours = 150;
       const state: Estudiante['estado'] = approvedHours >= requiredHours ? 'completado' : 'activo';
 
       return {
-        id: studentId,
-        nombre: fullName(assignment.student.user.first_name, assignment.student.user.last_name),
-        matricula: assignment.student.student_code,
-        carrera: toCareerLabel(assignment.student.career.code, assignment.student.career.name),
-        email: assignment.student.user.email,
+        id: student.id,
+        nombre: fullName(student.user.first_name, student.user.last_name),
+        matricula: student.student_code,
+        carrera: toCareerLabel(student.career.code, student.career.name),
+        email: student.user.email,
         horasRequeridas: requiredHours,
         horasCompletadas: Math.round(approvedHours),
         horasAcumuladas: Math.round(approvedHours),
         horasCompletadasPeriodo: Math.round(approvedHours),
-        periodoActual: ((assignment.term.sequence_number - 1) % 3) + 1 as Estudiante['periodoActual'],
+        periodoActual: assignment ? (((assignment.term.sequence_number - 1) % 3) + 1 as Estudiante['periodoActual']) : 1,
         estado: state,
-        areaActual: assignment.subarea.area.name,
-        subarea: assignment.subarea.name,
-        docenteResponsableId: assignment.teacher_profile.id,
-        docenteResponsable: fullName(
+        planEstudio: (student.study_plan.name === 'Trimestral' ? 'Trimestral' : 'Cuatrimestral') as Estudiante['planEstudio'],
+        areaActual: assignment?.subarea.area.name ?? 'Sin Asignar',
+        subarea: assignment?.subarea.name ?? 'Sin Asignar',
+        docenteResponsableId: assignment?.teacher_profile.id ?? '',
+        docenteResponsable: assignment ? fullName(
           assignment.teacher_profile.user.first_name,
           assignment.teacher_profile.user.last_name,
-        ),
-        cuatrimestre: assignment.term.name,
-        cursoAsignado: assignment.subarea.name,
+        ) : 'Sin Docente',
+        periodo: assignment?.term.name ?? 'No especificado',
+        cursoAsignado: assignment?.subarea.name ?? 'Sin Asignar',
       };
     })
     .sort((left, right) => left.nombre.localeCompare(right.nombre));
@@ -207,14 +212,14 @@ function mapLegacy(payload: LegacyPayload): Omit<LegacyDataBridgeResult, 'isLoad
     ),
   ].sort((left, right) => left.localeCompare(right));
 
-  const cuatrimestres = [
+  const Periodos = [
     ...new Set(assignments.map((assignment) => assignment.term.name)),
   ].sort((left, right) => left.localeCompare(right));
 
   return {
     areas: legacyAreas,
     carreras,
-    cuatrimestres,
+    Periodos,
     mockDocentes,
     mockEstudiantes,
     mockRegistrosHoras,
@@ -225,7 +230,7 @@ export function useLegacyDataBridge(): LegacyDataBridgeResult {
   const [data, setData] = useState<Omit<LegacyDataBridgeResult, 'isLoading' | 'error' | 'refresh'>>({
     areas: [],
     carreras: [],
-    cuatrimestres: [],
+    Periodos: [],
     mockDocentes: [],
     mockEstudiantes: [],
     mockRegistrosHoras: [],
@@ -238,15 +243,16 @@ export function useLegacyDataBridge(): LegacyDataBridgeResult {
       setIsLoading(true);
       setError(null);
 
-      const [areas, subareas, assignments, logs, teachers] = await Promise.all([
+      const [areas, subareas, assignments, logs, teachers, students] = await Promise.all([
         fetchAreas(),
         fetchSubareas(),
         fetchStudentAssignments(),
         fetchStudentHoursLogs(),
         fetchTeachers(),
+        fetchStudents(),
       ]);
 
-      setData(mapLegacy({ areas, subareas, assignments, logs, teachers }));
+      setData(mapLegacy({ areas, subareas, assignments, logs, teachers, students }));
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'No fue posible cargar la información.');
     } finally {

@@ -20,22 +20,11 @@ export const MisEstudiantes: React.FC = () => {
   const [filtroCarrera, setFiltroCarrera] = useState('todas');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [filtroCurso, setFiltroCurso] = useState('todos');
-
-  if (isLoading) {
-    return <div className="p-6 text-sm text-gray-500">Cargando estudiantes...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-sm text-red-600">{error}</div>;
-  }
+  const [filtroPlan, setFiltroPlan] = useState('todos');
 
   // Obtener el docente actual desde auth
   const docenteActualId = user?.docenteId;
   const docenteActual = mockDocentes.find(d => d.id === docenteActualId);
-
-  if (!docenteActual) {
-    return <div className="p-6 text-sm text-gray-500">No se encontró información del docente actual.</div>;
-  }
 
   // Filtrar estudiantes asignados al docente
   const estudiantesAsignados = useMemo(() => {
@@ -55,10 +44,11 @@ export const MisEstudiantes: React.FC = () => {
       const matchCarrera = filtroCarrera === 'todas' || est.carrera === filtroCarrera;
       const matchEstado = filtroEstado === 'todos' || est.estado === filtroEstado;
       const matchCurso = filtroCurso === 'todos' || est.cursoAsignado === filtroCurso;
+      const matchPlan = filtroPlan === 'todos' || est.planEstudio === filtroPlan;
 
-      return matchBusqueda && matchCarrera && matchEstado && matchCurso;
+      return matchBusqueda && matchCarrera && matchEstado && matchCurso && matchPlan;
     });
-  }, [estudiantesAsignados, busqueda, filtroCarrera, filtroEstado, filtroCurso]);
+  }, [estudiantesAsignados, busqueda, filtroCarrera, filtroEstado, filtroCurso, filtroPlan]);
 
   // Obtener carreras únicas
   const carrerasUnicas = useMemo(() => {
@@ -70,8 +60,20 @@ export const MisEstudiantes: React.FC = () => {
     return Array.from(new Set(estudiantesAsignados.map(e => e.cursoAsignado).filter(Boolean)));
   }, [estudiantesAsignados]);
 
-  // Función para obtener año del estudiante basado en el cuatrimestre
-  const obtenerAnio = (cuatrimestre: string): string => {
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando estudiantes...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
+  if (!docenteActual) {
+    return <div className="p-6 text-sm text-gray-500">No se encontró información del docente actual.</div>;
+  }
+
+  // Función para obtener año del estudiante basado en el Periodo
+  const obtenerAnio = (Periodo: string): string => {
     // Esto es un ejemplo, podrías tener un campo específico de año
     const anios = ['Primer Año', 'Segundo Año', 'Tercer Año', 'Cuarto Año'];
     return anios[Math.floor(Math.random() * anios.length)]; // Simulado
@@ -115,7 +117,7 @@ export const MisEstudiantes: React.FC = () => {
       est.matricula,
       est.nombre,
       est.carrera,
-      obtenerAnio(est.cuatrimestre),
+      obtenerAnio(est.periodo),
       obtenerModalidad(),
       generarCorreoInstitucional(est.nombre),
       est.cursoAsignado || 'Sin curso',
@@ -175,6 +177,18 @@ export const MisEstudiantes: React.FC = () => {
                 {carrerasUnicas.map(carrera => (
                   <SelectItem key={carrera} value={carrera}>{carrera}</SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+
+            {/* Filtro por Plan de Estudio */}
+            <Select value={filtroPlan} onValueChange={setFiltroPlan}>
+              <SelectTrigger className="w-full lg:w-[180px]">
+                <SelectValue placeholder="Plan de Estudio" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos los planes</SelectItem>
+                <SelectItem value="Cuatrimestral">Cuatrimestral</SelectItem>
+                <SelectItem value="Trimestral">Trimestral</SelectItem>
               </SelectContent>
             </Select>
 
@@ -243,7 +257,7 @@ export const MisEstudiantes: React.FC = () => {
             <span className="text-gray-600">
               Mostrando <span className="font-bold text-[#2E7D32]">{estudiantesFiltrados.length}</span> de {estudiantesAsignados.length} estudiantes
             </span>
-            {(busqueda || filtroCarrera !== 'todas' || filtroEstado !== 'todos' || filtroCurso !== 'todos') && (
+            {(busqueda || filtroCarrera !== 'todas' || filtroEstado !== 'todos' || filtroCurso !== 'todos' || filtroPlan !== 'todos') && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -252,6 +266,7 @@ export const MisEstudiantes: React.FC = () => {
                   setFiltroCarrera('todas');
                   setFiltroEstado('todos');
                   setFiltroCurso('todos');
+                  setFiltroPlan('todos');
                 }}
                 className="text-[#2E7D32] hover:bg-[#E8F5E9]"
               >
@@ -427,7 +442,7 @@ export const MisEstudiantes: React.FC = () => {
                         {/* Año */}
                         <TableCell>
                           <Badge variant="outline" className="border-purple-200 text-purple-700 bg-purple-50">
-                            {obtenerAnio(estudiante.cuatrimestre)}
+                            {obtenerAnio(estudiante.periodo)}
                           </Badge>
                         </TableCell>
 

@@ -39,7 +39,7 @@ type ViewMode = 'grid' | 'ranking' | 'asignaciones';
 export const Asignaciones: React.FC = () => {
   const {
     areas,
-    cuatrimestres,
+    Periodos,
     mockDocentes,
     mockEstudiantes,
     mockRegistrosHoras,
@@ -59,7 +59,7 @@ export const Asignaciones: React.FC = () => {
   const [selArea, setSelArea] = useState('');
   const [selSubarea, setSelSubarea] = useState('');
   const [selDocente, setSelDocente] = useState('');
-  const [selCuatrimestre, setSelCuatrimestre] = useState('');
+  const [selPeriodo, setSelPeriodo] = useState('');
 
   // ─── Computed area data ───
   const areasData = useMemo(() => {
@@ -114,13 +114,13 @@ export const Asignaciones: React.FC = () => {
   });
 
   const handleSave = () => {
-    if (!selEstudiante || !selArea || !selDocente || !selCuatrimestre) {
+    if (!selEstudiante || !selArea || !selDocente || !selPeriodo) {
       toast.error('Por favor completa todos los campos');
       return;
     }
     toast.success('Asignación creada exitosamente');
     setIsDialogOpen(false);
-    setSelEstudiante(''); setSelArea(''); setSelSubarea(''); setSelDocente(''); setSelCuatrimestre('');
+    setSelEstudiante(''); setSelArea(''); setSelSubarea(''); setSelDocente(''); setSelPeriodo('');
   };
 
   if (isLoading) {
@@ -600,11 +600,11 @@ export const Asignaciones: React.FC = () => {
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Cuatrimestre</Label>
-                  <Select value={selCuatrimestre} onValueChange={setSelCuatrimestre}>
-                    <SelectTrigger><SelectValue placeholder="Cuatrimestre" /></SelectTrigger>
+                  <Label>Periodo</Label>
+                  <Select value={selPeriodo} onValueChange={setSelPeriodo}>
+                    <SelectTrigger><SelectValue placeholder="Periodo" /></SelectTrigger>
                     <SelectContent>
-                      {cuatrimestres.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      {Periodos.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>

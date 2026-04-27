@@ -12,6 +12,34 @@ export const DashboardEstudiante: React.FC = () => {
   const { user } = useAuth();
   const { mockEstudiantes, mockRegistrosHoras, isLoading, error } = useLegacyDataBridge();
 
+  // Obtener datos del estudiante actual desde backend
+  const estudiante = mockEstudiantes.find(e => e.id === user?.estudianteId) || mockEstudiantes.find(e => e.email === user?.email) || mockEstudiantes[0];
+
+  // Datos para el gráfico - horas por mes
+  const chartData = React.useMemo(() => {
+    if (!estudiante) {
+      return [];
+    }
+
+    const monthly = mockRegistrosHoras
+      .filter(r => r.estudianteId === estudiante.id && r.estado === 'aprobada')
+      .reduce<Record<string, number>>((acc, registro) => {
+        const monthKey = registro.fecha.slice(0, 7);
+        acc[monthKey] = (acc[monthKey] ?? 0) + registro.totalHoras;
+        return acc;
+      }, {});
+
+    const formatter = new Intl.DateTimeFormat('es-ES', { month: 'short' });
+    return Object.entries(monthly)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, horas]) => {
+        const date = new Date(`${month}-01T00:00:00`);
+        const label = formatter.format(date);
+        const mes = label.charAt(0).toUpperCase() + label.slice(1).replace('.', '');
+        return { id: `mes-${month}`, mes, horas };
+      });
+  }, [mockRegistrosHoras, estudiante?.id]);
+
   if (isLoading) {
     return <div className="p-6 text-sm text-gray-500">Cargando dashboard...</div>;
   }
@@ -19,9 +47,7 @@ export const DashboardEstudiante: React.FC = () => {
   if (error) {
     return <div className="p-6 text-sm text-red-600">{error}</div>;
   }
-  
-  // Obtener datos del estudiante actual desde backend
-  const estudiante = mockEstudiantes.find(e => e.email === user?.email) || mockEstudiantes[0];
+
   if (!estudiante) {
     return <div className="p-6 text-sm text-gray-500">No se encontró información del estudiante.</div>;
   }
@@ -53,27 +79,6 @@ export const DashboardEstudiante: React.FC = () => {
     return 'SEP-DIC (Periodo 3)';
   };
   
-  // Datos para el gráfico - horas por mes
-  const chartData = React.useMemo(() => {
-    const monthly = mockRegistrosHoras
-      .filter(r => r.estudianteId === estudiante.id && r.estado === 'aprobada')
-      .reduce<Record<string, number>>((acc, registro) => {
-        const monthKey = registro.fecha.slice(0, 7);
-        acc[monthKey] = (acc[monthKey] ?? 0) + registro.totalHoras;
-        return acc;
-      }, {});
-
-    const formatter = new Intl.DateTimeFormat('es-ES', { month: 'short' });
-    return Object.entries(monthly)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([month, horas]) => {
-        const date = new Date(`${month}-01T00:00:00`);
-        const label = formatter.format(date);
-        const mes = label.charAt(0).toUpperCase() + label.slice(1).replace('.', '');
-        return { id: `mes-${month}`, mes, horas };
-      });
-  }, [mockRegistrosHoras, estudiante.id]);
-
   return (
     <div className="space-y-6">
       {/* Welcome Section */}

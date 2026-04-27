@@ -30,14 +30,14 @@ class Command(BaseCommand):
 
     def _seed_careers(self):
         careers = [
-            ('ice', 'Ingenieria Civil'),
-            ('iem', 'Ingenieria Electromecanica'),
-            ('ime', 'Ingenieria Mecanica'),
-            ('ims', 'Ingenieria en Sistemas'),
-            ('iel', 'Ingenieria Electronica'),
-            ('igi', 'Ingenieria en Gestion Industrial'),
-            ('lcm', 'Licenciatura en Ciencias de la Computacion'),
-            ('laf', 'Licenciatura en Administracion y Finanzas'),
+            ('ice', 'Ingeniería en Cibernética Electrónica'),
+            ('iem', 'Ingeniería Electromédica'),
+            ('ime', 'Ingeniería Mecánica y Energías Renovables'),
+            ('ims', 'Ingeniería Mecatrónica y Sistemas de Control'),
+            ('iel', 'Ingeniería Eléctrica'),
+            ('igi', 'Ingeniería en Gestión Industrial'),
+            ('lcm', 'Licenciatura Comercial con Énfasis en Mercadeo'),
+            ('laf', 'Licenciatura Administrativa con énfasis en Finanzas'),
         ]
         for code, name in careers:
             Career.objects.update_or_create(code=code, defaults={'name': name, 'is_active': True})
@@ -73,7 +73,7 @@ class Command(BaseCommand):
                 study_plan=cuatri,
                 sequence_number=seq,
                 defaults={
-                    'name': f'Cuatrimestre {seq} {current_year}',
+                    'name': f'Periodo {seq} {current_year}',
                     'start_date': start,
                     'end_date': end,
                     'is_closed': False,
@@ -86,7 +86,7 @@ class Command(BaseCommand):
                 study_plan=trim,
                 sequence_number=seq,
                 defaults={
-                    'name': f'Trimestre {seq} {current_year}',
+                    'name': f'Periodo {seq} {current_year}',
                     'start_date': start,
                     'end_date': end,
                     'is_closed': False,
@@ -126,7 +126,7 @@ class Command(BaseCommand):
 
     def _seed_demo_admin(self):
         admin_role = Role.objects.get(code='admin')
-        email = 'admin@sibec.local'
+        email = 'bienestar.estudiantil@ulsa.edu.ni'
         if User.objects.filter(email=email).exists():
             return
 

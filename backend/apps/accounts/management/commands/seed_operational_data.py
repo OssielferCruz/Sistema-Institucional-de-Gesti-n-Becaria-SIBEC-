@@ -70,373 +70,57 @@ class Command(BaseCommand):
     }
 
     DEPARTMENT_HEADS = [
-        {
-            'email': 'jefatura.ice@sibec.local',
-            'first_name': 'Laura',
-            'last_name': 'Mendoza',
-            'career_code': 'ice',
-        },
-        {
-            'email': 'jefatura.iem@sibec.local',
-            'first_name': 'Rafael',
-            'last_name': 'Cruz',
-            'career_code': 'iem',
-        },
-        {
-            'email': 'jefatura.ime@sibec.local',
-            'first_name': 'Patricia',
-            'last_name': 'Flores',
-            'career_code': 'ime',
-        },
-        {
-            'email': 'jefatura.ims@sibec.local',
-            'first_name': 'David',
-            'last_name': 'Hernandez',
-            'career_code': 'ims',
-        },
-        {
-            'email': 'jefatura.iel@sibec.local',
-            'first_name': 'Claudia',
-            'last_name': 'Morales',
-            'career_code': 'iel',
-        },
-        {
-            'email': 'jefatura.igi@sibec.local',
-            'first_name': 'Monica',
-            'last_name': 'Pineda',
-            'career_code': 'igi',
-        },
-        {
-            'email': 'jefatura.lcm@sibec.local',
-            'first_name': 'Jorge',
-            'last_name': 'Salas',
-            'career_code': 'lcm',
-        },
-        {
-            'email': 'jefatura.laf@sibec.local',
-            'first_name': 'Diana',
-            'last_name': 'Campos',
-            'career_code': 'laf',
-        },
+        {'email': 'jefatura.ice@ulsa.edu.ni', 'first_name': 'Laura Patricia', 'last_name': 'Mendoza Rios', 'career_code': 'ice'},
+        {'email': 'jefatura.iem@ulsa.edu.ni', 'first_name': 'Rafael Antonio', 'last_name': 'Cruz Silva', 'career_code': 'iem'},
+        {'email': 'jefatura.ime@ulsa.edu.ni', 'first_name': 'Patricia Elena', 'last_name': 'Flores Vargas', 'career_code': 'ime'},
+        {'email': 'jefatura.ims@ulsa.edu.ni', 'first_name': 'David Eduardo', 'last_name': 'Hernandez Solis', 'career_code': 'ims'},
+        {'email': 'jefatura.iel@ulsa.edu.ni', 'first_name': 'Claudia Maria', 'last_name': 'Morales Pineda', 'career_code': 'iel'},
+        {'email': 'jefatura.igi@ulsa.edu.ni', 'first_name': 'Monica Sofia', 'last_name': 'Pineda Rivas', 'career_code': 'igi'},
+        {'email': 'jefatura.lcm@ulsa.edu.ni', 'first_name': 'Jorge Luis', 'last_name': 'Salas Ruiz', 'career_code': 'lcm'},
+        {'email': 'jefatura.laf@ulsa.edu.ni', 'first_name': 'Diana Carolina', 'last_name': 'Campos Soto', 'career_code': 'laf'},
     ]
+
 
     TEACHERS = [
-        {
-            'email': 'docente.iceiem@sibec.local',
-            'first_name': 'Roberto',
-            'last_name': 'Mendez',
-            'employee_code': 'DOC-001',
-            'subarea_code': 'jefatura-ice-iem',
-        },
-        {
-            'email': 'docente.ime@sibec.local',
-            'first_name': 'Carolina',
-            'last_name': 'Lopez',
-            'employee_code': 'DOC-002',
-            'subarea_code': 'jefatura-ime',
-        },
-        {
-            'email': 'docente.imsiel@sibec.local',
-            'first_name': 'Gabriel',
-            'last_name': 'Ortega',
-            'employee_code': 'DOC-003',
-            'subarea_code': 'jefatura-ims-iel',
-        },
-        {
-            'email': 'docente.igi@sibec.local',
-            'first_name': 'Sonia',
-            'last_name': 'Vargas',
-            'employee_code': 'DOC-004',
-            'subarea_code': 'jefatura-igi',
-        },
-        {
-            'email': 'docente.lcmlaf@sibec.local',
-            'first_name': 'Mariana',
-            'last_name': 'Torres',
-            'employee_code': 'DOC-005',
-            'subarea_code': 'jefatura-lcm-laf',
-        },
-        {
-            'email': 'docente.biblioteca@sibec.local',
-            'first_name': 'Ana',
-            'last_name': 'Martinez',
-            'employee_code': 'DOC-006',
-            'subarea_code': 'biblioteca-general',
-        },
-        {
-            'email': 'docente.danza@sibec.local',
-            'first_name': 'Miguel',
-            'last_name': 'Torres',
-            'employee_code': 'DOC-007',
-            'subarea_code': 'danza',
-        },
-        {
-            'email': 'docente.futbol@sibec.local',
-            'first_name': 'Daniel',
-            'last_name': 'Castro',
-            'employee_code': 'DOC-008',
-            'subarea_code': 'futbol',
-        },
-        {
-            'email': 'docente.voleibol@sibec.local',
-            'first_name': 'Sandra',
-            'last_name': 'Ortiz',
-            'employee_code': 'DOC-009',
-            'subarea_code': 'voleibol',
-        },
-        {
-            'email': 'docente.extension@sibec.local',
-            'first_name': 'Jorge',
-            'last_name': 'Hernandez',
-            'employee_code': 'DOC-010',
-            'subarea_code': 'extension-coro',
-        },
-        {
-            'email': 'docente.cidtea@sibec.local',
-            'first_name': 'Ricardo',
-            'last_name': 'Guzman',
-            'employee_code': 'DOC-011',
-            'subarea_code': 'cidtea-lab',
-        },
-        {
-            'email': 'docente.brigada@sibec.local',
-            'first_name': 'Mariana',
-            'last_name': 'Solano',
-            'employee_code': 'DOC-012',
-            'subarea_code': 'brigada-ambiental-general',
-        },
-        {
-            'email': 'docente.comunicacion@sibec.local',
-            'first_name': 'Raul',
-            'last_name': 'Espinoza',
-            'employee_code': 'DOC-013',
-            'subarea_code': 'comunicacion-prensa',
-        },
-        {
-            'email': 'docente.decanatura@sibec.local',
-            'first_name': 'Andres',
-            'last_name': 'Medina',
-            'employee_code': 'DOC-014',
-            'subarea_code': 'decanatura-general',
-        },
-        {
-            'email': 'docente.ead@sibec.local',
-            'first_name': 'Pablo',
-            'last_name': 'Jimenez',
-            'employee_code': 'DOC-015',
-            'subarea_code': 'ead-soporte',
-        },
-        {
-            'email': 'docente.registro@sibec.local',
-            'first_name': 'Sofia',
-            'last_name': 'Ruiz',
-            'employee_code': 'DOC-016',
-            'subarea_code': 'registro-operativo',
-        },
+        {'email': 'roberto.mendez@ac.ulsa.edu.ni', 'first_name': 'Roberto Carlos', 'last_name': 'Mendez Castro', 'employee_code': 'DOC-001', 'subarea_code': 'jefatura-ice-iem'},
+        {'email': 'carolina.lopez@ac.ulsa.edu.ni', 'first_name': 'Carolina Beatriz', 'last_name': 'Lopez Garcia', 'employee_code': 'DOC-002', 'subarea_code': 'jefatura-ime'},
+        {'email': 'gabriel.ortega@ac.ulsa.edu.ni', 'first_name': 'Gabriel Alejandro', 'last_name': 'Ortega Salazar', 'employee_code': 'DOC-003', 'subarea_code': 'jefatura-ims-iel'},
+        {'email': 'sonia.vargas@ac.ulsa.edu.ni', 'first_name': 'Sonia del Carmen', 'last_name': 'Vargas Lopez', 'employee_code': 'DOC-004', 'subarea_code': 'jefatura-igi'},
+        {'email': 'mariana.torres@ac.ulsa.edu.ni', 'first_name': 'Mariana de Jesus', 'last_name': 'Torres Rivas', 'employee_code': 'DOC-005', 'subarea_code': 'jefatura-lcm-laf'},
+        {'email': 'ana.martinez@ac.ulsa.edu.ni', 'first_name': 'Ana Leticia', 'last_name': 'Martinez Soto', 'employee_code': 'DOC-006', 'subarea_code': 'biblioteca-general'},
+        {'email': 'miguel.torres@ac.ulsa.edu.ni', 'first_name': 'Miguel Angel', 'last_name': 'Torres Vargas', 'employee_code': 'DOC-007', 'subarea_code': 'danza'},
+        {'email': 'daniel.castro@ac.ulsa.edu.ni', 'first_name': 'Daniel Enrique', 'last_name': 'Castro Pineda', 'employee_code': 'DOC-008', 'subarea_code': 'futbol'},
+        {'email': 'sandra.ortiz@ac.ulsa.edu.ni', 'first_name': 'Sandra Milena', 'last_name': 'Ortiz Silva', 'employee_code': 'DOC-009', 'subarea_code': 'voleibol'},
+        {'email': 'jorge.hernandez@ac.ulsa.edu.ni', 'first_name': 'Jorge Luis', 'last_name': 'Hernandez Guzman', 'employee_code': 'DOC-010', 'subarea_code': 'extension-coro'},
+        {'email': 'ricardo.guzman@ac.ulsa.edu.ni', 'first_name': 'Ricardo Jose', 'last_name': 'Guzman Rios', 'employee_code': 'DOC-011', 'subarea_code': 'cidtea-lab'},
+        {'email': 'mariana.solano@ac.ulsa.edu.ni', 'first_name': 'Mariana Mercedes', 'last_name': 'Solano Flores', 'employee_code': 'DOC-012', 'subarea_code': 'brigada-ambiental-general'},
+        {'email': 'raul.espinoza@ac.ulsa.edu.ni', 'first_name': 'Raul Alberto', 'last_name': 'Espinoza Ruiz', 'employee_code': 'DOC-013', 'subarea_code': 'comunicacion-prensa'},
+        {'email': 'andres.medina@ac.ulsa.edu.ni', 'first_name': 'Andres Felipe', 'last_name': 'Medina Castro', 'employee_code': 'DOC-014', 'subarea_code': 'decanatura-general'},
+        {'email': 'pablo.jimenez@ac.ulsa.edu.ni', 'first_name': 'Pablo Emilio', 'last_name': 'Jimenez Salazar', 'employee_code': 'DOC-015', 'subarea_code': 'ead-soporte'},
+        {'email': 'sofia.ruiz@ac.ulsa.edu.ni', 'first_name': 'Sofia Margarita', 'last_name': 'Ruiz Mendoza', 'employee_code': 'DOC-016', 'subarea_code': 'registro-operativo'},
     ]
 
+
     STUDENTS = [
-        {
-            'email': 'estudiante.001@sibec.local',
-            'first_name': 'Juan',
-            'last_name': 'Perez',
-            'student_code': 'EST001',
-            'career_code': 'ice',
-            'subarea_code': 'jefatura-ice-iem',
-        },
-        {
-            'email': 'estudiante.002@sibec.local',
-            'first_name': 'Maria',
-            'last_name': 'Lopez',
-            'student_code': 'EST002',
-            'career_code': 'iem',
-            'subarea_code': 'jefatura-ice-iem',
-        },
-        {
-            'email': 'estudiante.003@sibec.local',
-            'first_name': 'Carlos',
-            'last_name': 'Sanchez',
-            'student_code': 'EST003',
-            'career_code': 'ime',
-            'subarea_code': 'jefatura-ime',
-        },
-        {
-            'email': 'estudiante.004@sibec.local',
-            'first_name': 'Andrea',
-            'last_name': 'Romero',
-            'student_code': 'EST004',
-            'career_code': 'ims',
-            'subarea_code': 'jefatura-ims-iel',
-        },
-        {
-            'email': 'estudiante.005@sibec.local',
-            'first_name': 'Diego',
-            'last_name': 'Jimenez',
-            'student_code': 'EST005',
-            'career_code': 'iel',
-            'subarea_code': 'jefatura-ims-iel',
-        },
-        {
-            'email': 'estudiante.006@sibec.local',
-            'first_name': 'Sofia',
-            'last_name': 'Navarro',
-            'student_code': 'EST006',
-            'career_code': 'igi',
-            'subarea_code': 'jefatura-igi',
-        },
-        {
-            'email': 'estudiante.007@sibec.local',
-            'first_name': 'Valeria',
-            'last_name': 'Morales',
-            'student_code': 'EST007',
-            'career_code': 'lcm',
-            'subarea_code': 'jefatura-lcm-laf',
-        },
-        {
-            'email': 'estudiante.008@sibec.local',
-            'first_name': 'Patricia',
-            'last_name': 'Vazquez',
-            'student_code': 'EST008',
-            'career_code': 'laf',
-            'subarea_code': 'jefatura-lcm-laf',
-        },
-        {
-            'email': 'estudiante.009@sibec.local',
-            'first_name': 'Jorge',
-            'last_name': 'Castillo',
-            'student_code': 'EST009',
-            'career_code': 'ice',
-            'subarea_code': 'biblioteca-general',
-        },
-        {
-            'email': 'estudiante.010@sibec.local',
-            'first_name': 'Gabriela',
-            'last_name': 'Herrera',
-            'student_code': 'EST010',
-            'career_code': 'laf',
-            'subarea_code': 'biblioteca-general',
-        },
-        {
-            'email': 'estudiante.011@sibec.local',
-            'first_name': 'Armando',
-            'last_name': 'Ruiz',
-            'student_code': 'EST011',
-            'career_code': 'ims',
-            'subarea_code': 'danza',
-        },
-        {
-            'email': 'estudiante.012@sibec.local',
-            'first_name': 'Fernanda',
-            'last_name': 'Salas',
-            'student_code': 'EST012',
-            'career_code': 'iem',
-            'subarea_code': 'futbol',
-        },
-        {
-            'email': 'estudiante.013@sibec.local',
-            'first_name': 'Lucia',
-            'last_name': 'Luna',
-            'student_code': 'EST013',
-            'career_code': 'igi',
-            'subarea_code': 'voleibol',
-        },
-        {
-            'email': 'estudiante.014@sibec.local',
-            'first_name': 'Ricardo',
-            'last_name': 'Nuñez',
-            'student_code': 'EST014',
-            'career_code': 'ime',
-            'subarea_code': 'danza',
-        },
-        {
-            'email': 'estudiante.015@sibec.local',
-            'first_name': 'Ximena',
-            'last_name': 'Campos',
-            'student_code': 'EST015',
-            'career_code': 'lcm',
-            'subarea_code': 'futbol',
-        },
-        {
-            'email': 'estudiante.016@sibec.local',
-            'first_name': 'Ivan',
-            'last_name': 'Guerrero',
-            'student_code': 'EST016',
-            'career_code': 'iel',
-            'subarea_code': 'voleibol',
-        },
-        {
-            'email': 'estudiante.017@sibec.local',
-            'first_name': 'Julian',
-            'last_name': 'Rojas',
-            'student_code': 'EST017',
-            'career_code': 'ice',
-            'subarea_code': 'extension-coro',
-        },
-        {
-            'email': 'estudiante.018@sibec.local',
-            'first_name': 'Karla',
-            'last_name': 'Mora',
-            'student_code': 'EST018',
-            'career_code': 'ims',
-            'subarea_code': 'extension-coro',
-        },
-        {
-            'email': 'estudiante.019@sibec.local',
-            'first_name': 'Luis',
-            'last_name': 'Paz',
-            'student_code': 'EST019',
-            'career_code': 'iem',
-            'subarea_code': 'cidtea-lab',
-        },
-        {
-            'email': 'estudiante.020@sibec.local',
-            'first_name': 'Martha',
-            'last_name': 'Acosta',
-            'student_code': 'EST020',
-            'career_code': 'igi',
-            'subarea_code': 'cidtea-lab',
-        },
-        {
-            'email': 'estudiante.021@sibec.local',
-            'first_name': 'Nestor',
-            'last_name': 'Vega',
-            'student_code': 'EST021',
-            'career_code': 'ime',
-            'subarea_code': 'brigada-ambiental-general',
-        },
-        {
-            'email': 'estudiante.022@sibec.local',
-            'first_name': 'Olga',
-            'last_name': 'Ibarra',
-            'student_code': 'EST022',
-            'career_code': 'lcm',
-            'subarea_code': 'comunicacion-prensa',
-        },
-        {
-            'email': 'estudiante.023@sibec.local',
-            'first_name': 'Pedro',
-            'last_name': 'Suarez',
-            'student_code': 'EST023',
-            'career_code': 'laf',
-            'subarea_code': 'decanatura-general',
-        },
-        {
-            'email': 'estudiante.024@sibec.local',
-            'first_name': 'Quetzal',
-            'last_name': 'Lozano',
-            'student_code': 'EST024',
-            'career_code': 'iel',
-            'subarea_code': 'ead-soporte',
-        },
-        {
-            'email': 'estudiante.025@sibec.local',
-            'first_name': 'Rocio',
-            'last_name': 'Serrano',
-            'student_code': 'EST025',
-            'career_code': 'ims',
-            'subarea_code': 'registro-operativo',
-        },
+        {'email': 'juan.perez@est.ulsa.edu.ni', 'first_name': 'Juan Jose', 'last_name': 'Perez Lopez', 'student_code': 'EST001', 'career_code': 'ice', 'subarea_code': 'jefatura-ice-iem', 'study_plan': 'cuatri'},
+        {'email': 'maria.lopez@est.ulsa.edu.ni', 'first_name': 'Maria Elena', 'last_name': 'Lopez Garcia', 'student_code': 'EST002', 'career_code': 'iem', 'subarea_code': 'jefatura-ice-iem', 'study_plan': 'trim'},
+        {'email': 'carlos.sanchez@est.ulsa.edu.ni', 'first_name': 'Carlos Alfonso', 'last_name': 'Sanchez Cruz', 'student_code': 'EST003', 'career_code': 'ime', 'subarea_code': 'jefatura-ime', 'study_plan': 'cuatri'},
+        {'email': 'andrea.romero@est.ulsa.edu.ni', 'first_name': 'Andrea Sofia', 'last_name': 'Romero Pineda', 'student_code': 'EST004', 'career_code': 'ims', 'subarea_code': 'jefatura-ims-iel', 'study_plan': 'trim'},
+        {'email': 'diego.jimenez@est.ulsa.edu.ni', 'first_name': 'Diego Fernando', 'last_name': 'Jimenez Rivas', 'student_code': 'EST005', 'career_code': 'iel', 'subarea_code': 'jefatura-ims-iel', 'study_plan': 'cuatri'},
+        {'email': 'sofia.navarro@est.ulsa.edu.ni', 'first_name': 'Sofia Alejandra', 'last_name': 'Navarro Soto', 'student_code': 'EST006', 'career_code': 'igi', 'subarea_code': 'jefatura-igi', 'study_plan': 'trim'},
+        {'email': 'valeria.morales@est.ulsa.edu.ni', 'first_name': 'Valeria de los Angeles', 'last_name': 'Morales Vargas', 'student_code': 'EST007', 'career_code': 'lcm', 'subarea_code': 'jefatura-lcm-laf', 'study_plan': 'cuatri'},
+        {'email': 'patricia.vazquez@est.ulsa.edu.ni', 'first_name': 'Patricia del Carmen', 'last_name': 'Vazquez Castro', 'student_code': 'EST008', 'career_code': 'laf', 'subarea_code': 'jefatura-lcm-laf', 'study_plan': 'trim'},
+        {'email': 'jorge.castillo@est.ulsa.edu.ni', 'first_name': 'Jorge Luis', 'last_name': 'Castillo Mendoza', 'student_code': 'EST009', 'career_code': 'ice', 'subarea_code': 'biblioteca-general', 'study_plan': 'cuatri'},
+        {'email': 'gabriela.herrera@est.ulsa.edu.ni', 'first_name': 'Gabriela Patricia', 'last_name': 'Herrera Ruiz', 'student_code': 'EST010', 'career_code': 'laf', 'subarea_code': 'biblioteca-general', 'study_plan': 'trim'},
+        {'email': 'armando.ruiz@est.ulsa.edu.ni', 'first_name': 'Armando Jose', 'last_name': 'Ruiz Silva', 'student_code': 'EST011', 'career_code': 'ims', 'subarea_code': 'danza', 'study_plan': 'cuatri'},
+        {'email': 'fernanda.salas@est.ulsa.edu.ni', 'first_name': 'Fernanda Victoria', 'last_name': 'Salas Flores', 'student_code': 'EST012', 'career_code': 'iem', 'subarea_code': 'futbol', 'study_plan': 'trim'},
+        {'email': 'lucia.luna@est.ulsa.edu.ni', 'first_name': 'Lucia Vanessa', 'last_name': 'Luna Guzman', 'student_code': 'EST013', 'career_code': 'igi', 'subarea_code': 'voleibol', 'study_plan': 'cuatri'},
+        {'email': 'ricardo.nunez@est.ulsa.edu.ni', 'first_name': 'Ricardo Antonio', 'last_name': 'Nuñez Rios', 'student_code': 'EST014', 'career_code': 'ime', 'subarea_code': 'danza', 'study_plan': 'trim'},
+        {'email': 'ximena.campos@est.ulsa.edu.ni', 'first_name': 'Ximena Isabel', 'last_name': 'Campos Salazar', 'student_code': 'EST015', 'career_code': 'lcm', 'subarea_code': 'futbol', 'study_plan': 'cuatri'},
+        {'email': 'ivan.guerrero@est.ulsa.edu.ni', 'first_name': 'Ivan Dario', 'last_name': 'Guerrero Ortiz', 'student_code': 'EST016', 'career_code': 'iel', 'subarea_code': 'voleibol', 'study_plan': 'trim'},
+        {'email': 'julian.rojas@est.ulsa.edu.ni', 'first_name': 'Julian Andres', 'last_name': 'Rojas Cruz', 'student_code': 'EST017', 'career_code': 'ice', 'subarea_code': 'extension-coro', 'study_plan': 'cuatri'},
     ]
+
 
     def handle(self, *args, **options):
         with transaction.atomic():
@@ -448,15 +132,19 @@ class Command(BaseCommand):
             role_docente = Role.objects.get(code='docente')
             role_estudiante = Role.objects.get(code='estudiante')
 
-            study_plan = StudyPlan.objects.get(code='cuatri')
-            active_term = self._get_active_term(study_plan)
+            cuatri = StudyPlan.objects.get(code='cuatri')
+            trim = StudyPlan.objects.get(code='trim')
+            active_term_cuatri = self._get_active_term(cuatri)
+            active_term_trim = self._get_active_term(trim)
 
             teacher_by_subarea = self._seed_teachers(role_docente)
             department_head_by_career = self._seed_department_heads(role_jefatura)
             assignments = self._seed_students_and_assignments(
                 role_estudiante,
-                study_plan,
-                active_term,
+                cuatri,
+                trim,
+                active_term_cuatri,
+                active_term_trim,
                 teacher_by_subarea,
             )
 
@@ -583,8 +271,10 @@ class Command(BaseCommand):
     def _seed_students_and_assignments(
         self,
         role_estudiante: Role,
-        study_plan: StudyPlan,
-        term: Term,
+        cuatri: StudyPlan,
+        trim: StudyPlan,
+        active_term_cuatri: Term,
+        active_term_trim: Term,
         teacher_by_subarea: dict[str, TeacherProfile],
     ) -> list[Assignment]:
         assignments: list[Assignment] = []
@@ -607,7 +297,7 @@ class Command(BaseCommand):
                 defaults={
                     'user': user,
                     'career': career,
-                    'study_plan': study_plan,
+                                        'study_plan': trim if payload.get('study_plan') == 'trim' else cuatri,
                     'admission_year': current_year - 1,
                     'scholarship_status': 'active',
                     'required_annual_hours': 150,
@@ -615,7 +305,8 @@ class Command(BaseCommand):
                 },
             )
 
-            assignment = Assignment.objects.filter(student=student, term=term, status='active').first()
+            term_to_use = active_term_trim if payload.get('study_plan') == 'trim' else active_term_cuatri
+            assignment = Assignment.objects.filter(student=student, term=term_to_use, status='active').first()
             if assignment:
                 assignment.subarea = subarea
                 assignment.teacher_profile = teacher_profile
@@ -626,7 +317,7 @@ class Command(BaseCommand):
                     student=student,
                     subarea=subarea,
                     teacher_profile=teacher_profile,
-                    term=term,
+                    term=term_to_use,
                     status='active',
                     notes=f'Asignacion operativa para {subarea.name}',
                 )

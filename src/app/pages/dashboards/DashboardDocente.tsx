@@ -79,8 +79,8 @@ const ModalDesglose: React.FC<ModalDesgloseProps> = ({ isOpen, onClose, title, t
                       <p className="text-xs font-medium text-gray-700 truncate">{estudiante.email}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Cuatrimestre</p>
-                      <p className="text-xs font-medium text-gray-700">{estudiante.cuatrimestre}</p>
+                      <p className="text-xs text-gray-500">Periodo</p>
+                      <p className="text-xs font-medium text-gray-700">{estudiante.Periodo}</p>
                     </div>
                   </div>
                 </div>

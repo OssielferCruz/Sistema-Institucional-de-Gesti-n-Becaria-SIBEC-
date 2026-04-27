@@ -51,14 +51,6 @@ export const Estudiantes: React.FC = () => {
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
 
-  if (isLoading) {
-    return <div className="p-6 text-sm text-gray-500">Cargando estudiantes...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-sm text-red-600">{error}</div>;
-  }
-
   const uniqueAreas = useMemo(() => [...new Set(mockEstudiantes.map(e => e.areaActual).filter(Boolean))].sort() as string[], [mockEstudiantes]);
   const uniqueCarreras = useMemo(() => [...new Set(mockEstudiantes.map(e => getCarreraCode(e.carrera)))].sort(), [mockEstudiantes]);
 
@@ -102,6 +94,14 @@ export const Estudiantes: React.FC = () => {
   const hasFilters = !!(search || filterArea || filterCarrera || filterEstado);
   const clearFilters = () => { setSearch(''); setFilterArea(''); setFilterCarrera(''); setFilterEstado(''); setPage(1); };
 
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando estudiantes...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
   // ── STUDENT DETAIL VIEW ──
   if (selectedStudent) {
     const est = selectedStudent;
@@ -144,8 +144,8 @@ export const Estudiantes: React.FC = () => {
                   <p className="text-lg font-bold text-gray-700">{est.periodoActual}/3</p>
                 </div>
                 <div className="text-center px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-100">
-                  <p className="text-[10px] text-gray-400 uppercase">Cuatrimestre</p>
-                  <p className="text-sm font-bold text-gray-700">{est.cuatrimestre}</p>
+                  <p className="text-[10px] text-gray-400 uppercase">Periodo</p>
+                  <p className="text-sm font-bold text-gray-700">{est.Periodo}</p>
                 </div>
               </div>
             </div>
@@ -493,9 +493,9 @@ export const Estudiantes: React.FC = () => {
                                 <div className="flex items-center gap-2 p-3 bg-white rounded-xl border border-gray-100 flex-1 min-w-[150px]">
                                   <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                   <div>
-                                    <p className="text-[9px] text-gray-400 uppercase">Periodo / Cuatrimestre</p>
+                                    <p className="text-[9px] text-gray-400 uppercase">Periodo / Periodo</p>
                                     <p className="text-gray-700 font-medium">Periodo {est.periodoActual}/3</p>
-                                    <p className="text-gray-400">{est.cuatrimestre}</p>
+                                    <p className="text-gray-400">{est.Periodo}</p>
                                   </div>
                                 </div>
                                 {est.cursoAsignado && (
@@ -580,7 +580,7 @@ export const Estudiantes: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-1.5 p-2 bg-gray-50 rounded-lg">
                         <Clock className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                        <span className="text-gray-600">{est.cuatrimestre}</span>
+                        <span className="text-gray-600">{est.Periodo}</span>
                       </div>
                     </div>
 

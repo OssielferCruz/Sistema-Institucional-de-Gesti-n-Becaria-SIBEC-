@@ -80,7 +80,7 @@ export const ComunicacionEstudiante: React.FC = () => {
     {
       id: 'bienestar',
       nombre: 'Oficina de Bienestar Estudiantil',
-      email: 'bienestar@ulsa.mx',
+      email: 'bienestar.estudiantil@ulsa.edu.ni',
       rol: 'Personal de Bienestar',
       area: 'Bienestar Estudiantil',
       subarea: 'Horas Sociales',

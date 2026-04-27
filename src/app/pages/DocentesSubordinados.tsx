@@ -26,14 +26,6 @@ export const DocentesSubordinados: React.FC = () => {
   const [vista, setVista] = useState<Vista>('estudiantes');
   const [busqueda, setBusqueda] = useState('');
 
-  if (isLoading) {
-    return <div className="p-6 text-sm text-gray-500">Cargando datos de docentes y estudiantes...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-sm text-red-600">{error}</div>;
-  }
-
   const carrerasJefe = user?.carrerasAsignadas || (user?.carrera ? [user.carrera] : []);
 
   // Solo docentes de Asistencia Docente de las carreras del jefe
@@ -99,6 +91,14 @@ export const DocentesSubordinados: React.FC = () => {
 
   const estudiantesActivos = estudiantesAsistencia.filter(e => e.estado === 'activo').length;
   const estudiantesCompletados = estudiantesAsistencia.filter(e => e.estado === 'completado').length;
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando datos de docentes y estudiantes...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -342,9 +342,9 @@ export const DocentesSubordinados: React.FC = () => {
                             </div>
                             <div className="bg-white rounded-xl border border-gray-100 p-3">
                               <p className="text-xs text-gray-500 mb-1 flex items-center gap-1">
-                                <Calendar className="w-3 h-3" /> Cuatrimestre
+                                <Calendar className="w-3 h-3" /> Periodo
                               </p>
-                              <p className="text-sm font-medium text-gray-800">{estudiante.cuatrimestre}</p>
+                              <p className="text-sm font-medium text-gray-800">{estudiante.Periodo}</p>
                             </div>
                           </div>
 
@@ -356,7 +356,7 @@ export const DocentesSubordinados: React.FC = () => {
                                 Periodo Actual
                               </p>
                               <Badge variant="outline" className="text-[#2E7D32] border-[#2E7D32] text-xs">
-                                {estudiante.cuatrimestre} · Periodo {(() => {
+                                {estudiante.Periodo} · Periodo {(() => {
                                   if (estudiante.horasCompletadas <= 50) return 1;
                                   if (estudiante.horasCompletadas <= 100) return 2;
                                   return 3;

@@ -1,5 +1,16 @@
 # Backend SIBEC
 
+## Prototipo completo (frontend + backend + db)
+
+Desde la raiz del repositorio:
+
+```
+docker compose -f docker-compose.prototype.yml up --build -d
+```
+
+Frontend: http://localhost:8080
+API: http://localhost:8000/api/v1/
+
 ## Setup rapido
 
 1. Crear entorno virtual
@@ -58,3 +69,24 @@ Ejecutar pruebas con coverage:
 
 - POST /api/v1/students/import_csv/
 - Form-data con campo file
+
+## Healthcheck
+
+- GET /healthz/
+- Respuesta esperada: status ok, database up
+
+## Readiness
+
+- GET /readyz/
+- Respuesta esperada: status ready, database up
+
+## Ejecucion en produccion
+
+- Dependencia WSGI: `gunicorn` (incluida en requirements.txt)
+- Comando sugerido:
+
+```
+gunicorn config.wsgi --log-file - --workers 3 --threads 2 --timeout 120
+```
+
+- Para plataformas como Render/Railway se incluye `Procfile` en este directorio.

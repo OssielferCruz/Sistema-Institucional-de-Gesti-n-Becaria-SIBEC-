@@ -11,7 +11,7 @@ export interface Asignacion {
   subarea?: string;
   responsable: string;
   docenteResponsable?: string;
-  cuatrimestre: string;
+  Periodo: string;
   fechaInicio: string;
   fechaFin?: string;
   estado: 'activa' | 'finalizada';
@@ -104,7 +104,7 @@ export const carreras = [
   'LCM - Licenciatura Comercial con Énfasis en Mercadeo'
 ];
 
-export const cuatrimestres = [
+export const Periodos = [
   'ENE-ABR 2024',
   'MAY-AGO 2024',
   'SEP-DIC 2024',
@@ -332,7 +332,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura ICE/IEM',
     docenteResponsableId: 'doc-1',
     docenteResponsable: 'Dr. Roberto Méndez',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Programación Avanzada'
   },
   {
@@ -351,7 +351,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura ICE/IEM',
     docenteResponsableId: 'doc-1',
     docenteResponsable: 'Dr. Roberto Méndez',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Circuitos Electrónicos II'
   },
   {
@@ -370,7 +370,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura IME',
     docenteResponsableId: 'doc-2',
     docenteResponsable: 'Ing. Patricia Flores',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Termodinámica Aplicada'
   },
   {
@@ -389,7 +389,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura IMS/IEL',
     docenteResponsableId: 'doc-3',
     docenteResponsable: 'Mtro. Fernando Silva',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Sistemas de Control Automático'
   },
   {
@@ -408,7 +408,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura IMS/IEL',
     docenteResponsableId: 'doc-3',
     docenteResponsable: 'Mtro. Fernando Silva',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Máquinas Eléctricas'
   },
   {
@@ -427,7 +427,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura IGI',
     docenteResponsableId: 'doc-4',
     docenteResponsable: 'Ing. Laura Ramírez',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Gestión de Operaciones'
   },
   {
@@ -446,7 +446,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura LCM/LAF',
     docenteResponsableId: 'doc-5',
     docenteResponsable: 'Lic. Carlos Vega',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Investigación de Mercados'
   },
   {
@@ -465,7 +465,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura LCM/LAF',
     docenteResponsableId: 'doc-5',
     docenteResponsable: 'Lic. Carlos Vega',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Contabilidad Financiera'
   },
   {
@@ -483,7 +483,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Biblioteca',
     docenteResponsableId: 'doc-6',
     docenteResponsable: 'Lic. Ana Martínez',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-10',
@@ -500,7 +500,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Biblioteca',
     docenteResponsableId: 'doc-6',
     docenteResponsable: 'Lic. Ana Martínez',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-11',
@@ -518,7 +518,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Danza',
     docenteResponsableId: 'doc-7',
     docenteResponsable: 'Prof. Miguel Torres',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-12',
@@ -536,7 +536,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Fútbol',
     docenteResponsableId: 'doc-8',
     docenteResponsable: 'Prof. Daniel Castro',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-13',
@@ -554,7 +554,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Voleibol',
     docenteResponsableId: 'doc-9',
     docenteResponsable: 'Profa. Sandra Ortiz',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-14',
@@ -572,7 +572,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Taller y Laboratorio',
     docenteResponsableId: 'doc-10',
     docenteResponsable: 'Mtro. Ricardo Guzmán',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-15',
@@ -590,7 +590,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Taller y Laboratorio',
     docenteResponsableId: 'doc-10',
     docenteResponsable: 'Mtro. Ricardo Guzmán',
-    cuatrimestre: 'SEP-DIC 2025'
+    Periodo: 'SEP-DIC 2025'
   },
   {
     id: 'est-16',
@@ -608,7 +608,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura ICE/IEM',
     docenteResponsableId: 'doc-1',
     docenteResponsable: 'Dr. Roberto Méndez',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Sistemas Digitales I'
   },
   {
@@ -626,7 +626,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Biblioteca',
     docenteResponsableId: 'doc-11',
     docenteResponsable: 'Ing. Gabriela Moreno',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-18',
@@ -643,7 +643,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Biblioteca',
     docenteResponsableId: 'doc-11',
     docenteResponsable: 'Ing. Gabriela Moreno',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-19',
@@ -660,7 +660,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Biblioteca',
     docenteResponsableId: 'doc-11',
     docenteResponsable: 'Ing. Gabriela Moreno',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-20',
@@ -678,7 +678,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Coro',
     docenteResponsableId: 'doc-12',
     docenteResponsable: 'Lic. Jorge Hernández',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-21',
@@ -696,7 +696,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Coro',
     docenteResponsableId: 'doc-12',
     docenteResponsable: 'Lic. Jorge Hernández',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-22',
@@ -714,7 +714,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura IMS/IEL',
     docenteResponsableId: 'doc-13',
     docenteResponsable: 'Mtro. Eduardo Reyes',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Diseño Mecatrónico'
   },
   {
@@ -733,7 +733,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura IMS/IEL',
     docenteResponsableId: 'doc-13',
     docenteResponsable: 'Mtro. Eduardo Reyes',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Circuitos Eléctricos III'
   },
   {
@@ -752,7 +752,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Taller y Laboratorio',
     docenteResponsableId: 'doc-14',
     docenteResponsable: 'Ing. Sofía Ruiz',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-25',
@@ -770,7 +770,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Taller y Laboratorio',
     docenteResponsableId: 'doc-14',
     docenteResponsable: 'Ing. Sofía Ruiz',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-26',
@@ -788,7 +788,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Misioneros',
     docenteResponsableId: 'doc-15',
     docenteResponsable: 'Prof. Andrés Medina',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-27',
@@ -806,7 +806,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura ICE/IEM',
     docenteResponsableId: 'doc-16',
     docenteResponsable: 'Dra. Carmen Delgado',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Instrumentación Biomédica'
   },
   {
@@ -825,7 +825,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Jefatura ICE/IEM',
     docenteResponsableId: 'doc-16',
     docenteResponsable: 'Dra. Carmen Delgado',
-    cuatrimestre: 'ENE-ABR 2026',
+    Periodo: 'ENE-ABR 2026',
     cursoAsignado: 'Electrónica de Potencia'
   },
   {
@@ -844,7 +844,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Proyectos de Investigación Ambiental',
     docenteResponsableId: 'doc-17',
     docenteResponsable: 'Mtro. Pablo Jiménez',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-30',
@@ -862,7 +862,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Proyectos de Investigación Ambiental',
     docenteResponsableId: 'doc-17',
     docenteResponsable: 'Mtro. Pablo Jiménez',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   // Extensión Universitaria - Brigada Ambiental
   {
@@ -881,7 +881,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Brigada Ambiental',
     docenteResponsableId: 'doc-18',
     docenteResponsable: 'Prof. Raúl Espinoza',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-32',
@@ -899,7 +899,7 @@ export const mockEstudiantes: Estudiante[] = [
     subarea: 'Brigada Ambiental',
     docenteResponsableId: 'doc-18',
     docenteResponsable: 'Prof. Raúl Espinoza',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   // Brigada Ambiental (área independiente)
   {
@@ -917,7 +917,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Brigada Ambiental',
     docenteResponsableId: 'doc-19',
     docenteResponsable: 'Lic. Mariana Solano',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-34',
@@ -934,7 +934,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Brigada Ambiental',
     docenteResponsableId: 'doc-19',
     docenteResponsable: 'Lic. Mariana Solano',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   // Comunicación Institucional
   {
@@ -952,7 +952,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Comunicación Institucional',
     docenteResponsableId: 'doc-20',
     docenteResponsable: 'Lic. Héctor Villanueva',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-36',
@@ -969,7 +969,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Comunicación Institucional',
     docenteResponsableId: 'doc-20',
     docenteResponsable: 'Lic. Héctor Villanueva',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   // Decanatura
   {
@@ -987,7 +987,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Decanatura',
     docenteResponsableId: 'doc-21',
     docenteResponsable: 'Dra. Lorena Campos',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-38',
@@ -1004,7 +1004,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Decanatura',
     docenteResponsableId: 'doc-21',
     docenteResponsable: 'Dra. Lorena Campos',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   // Educación a Distancia
   {
@@ -1022,7 +1022,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Educación a Distancia',
     docenteResponsableId: 'doc-22',
     docenteResponsable: 'Ing. Oscar Paredes',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-40',
@@ -1039,7 +1039,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Educación a Distancia',
     docenteResponsableId: 'doc-22',
     docenteResponsable: 'Ing. Oscar Paredes',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   // Registro Académico
   {
@@ -1057,7 +1057,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Registro Académico',
     docenteResponsableId: 'doc-23',
     docenteResponsable: 'Lic. Rosa Elena Fuentes',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   },
   {
     id: 'est-42',
@@ -1074,7 +1074,7 @@ export const mockEstudiantes: Estudiante[] = [
     areaActual: 'Registro Académico',
     docenteResponsableId: 'doc-23',
     docenteResponsable: 'Lic. Rosa Elena Fuentes',
-    cuatrimestre: 'ENE-ABR 2026'
+    Periodo: 'ENE-ABR 2026'
   }
 ];
 
@@ -2370,7 +2370,7 @@ export const mockAsignaciones: Asignacion[] = mockEstudiantes.map(est => ({
   subarea: est.subarea,
   responsable: est.docenteResponsable || '',
   docenteResponsable: est.docenteResponsable,
-  cuatrimestre: est.cuatrimestre,
+  Periodo: est.Periodo,
   fechaInicio: '2026-01-15',
   estado: 'activa' as const
 }));

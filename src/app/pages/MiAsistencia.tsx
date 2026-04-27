@@ -65,19 +65,7 @@ export const MiAsistencia: React.FC = () => {
   const [eventoSeleccionado, setEventoSeleccionado] = useState<EventoCalendario | null>(null);
   const [modalDetallesAbierto, setModalDetallesAbierto] = useState(false);
 
-  // Obtener información del estudiante
-  if (isLoading) {
-    return <div className="p-6 text-sm text-gray-500">Cargando asistencia...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-sm text-red-600">{error}</div>;
-  }
-
   const estudiante = mockEstudiantes.find(e => e.email === user?.email) || mockEstudiantes[0];
-  if (!estudiante) {
-    return <div className="p-6 text-sm text-gray-500">No se encontró información del estudiante.</div>;
-  }
 
   // Obtener registros de horas del estudiante
   const registrosEstudiante = mockRegistrosHoras.filter(r => r.estudianteId === estudiante.id);
@@ -168,9 +156,9 @@ export const MiAsistencia: React.FC = () => {
     const horasRechazadas = rechazadas.reduce((sum, e) => sum + e.totalHoras, 0);
     const horasTotales = eventosFiltrados.reduce((sum, e) => sum + e.totalHoras, 0);
 
-    const horasRequeridasCuatrimestre = 50;
-    const horasPorCumplir = Math.max(0, horasRequeridasCuatrimestre - horasAprobadas);
-    const progreso = (horasAprobadas / horasRequeridasCuatrimestre) * 100;
+    const horasRequeridasPeriodo = 50;
+    const horasPorCumplir = Math.max(0, horasRequeridasPeriodo - horasAprobadas);
+    const progreso = (horasAprobadas / horasRequeridasPeriodo) * 100;
 
     return {
       totalRegistros: eventosFiltrados.length,
@@ -241,6 +229,18 @@ export const MiAsistencia: React.FC = () => {
     setFechaInicio('');
     setFechaFin('');
   };
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando asistencia...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
+
+  if (!estudiante) {
+    return <div className="p-6 text-sm text-gray-500">No se encontró información del estudiante.</div>;
+  }
 
   // Exportar datos
   const exportarDatos = () => {
@@ -965,7 +965,7 @@ export const MiAsistencia: React.FC = () => {
               <ul className="list-disc list-inside space-y-1 text-[#2E7D32]">
                 <li>Esta es una vista de solo lectura. Tu docente responsable registra las horas</li>
                 <li>Las horas deben ser aprobadas por la jefatura de carrera para contar hacia tu meta</li>
-                <li>Debes completar 50 horas por cuatrimestre (150 horas anuales en total)</li>
+                <li>Debes completar 50 horas por Periodo (150 horas anuales en total)</li>
                 <li>Contacta a tu docente responsable si tienes dudas sobre tus registros</li>
               </ul>
             </div>

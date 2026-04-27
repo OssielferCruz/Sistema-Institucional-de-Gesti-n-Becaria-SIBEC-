@@ -19,7 +19,8 @@ import {
   UserCircle,
   UsersRound,
   Mail,
-  DatabaseZap
+  DatabaseZap,
+  UserCog
 } from 'lucide-react';
 import { Button } from '../ui/button';
 
@@ -60,6 +61,12 @@ const navItems: NavItem[] = [
     path: '/control-becados',
     icon: <DatabaseZap className="w-5 h-5" />,
     roles: ['admin'] // Solo Admin gestiona altas, bajas, importaciones
+  },
+  {
+    name: 'Gestión de Usuarios',
+    path: '/gestion-usuarios',
+    icon: <UserCog className="w-5 h-5" />,
+    roles: ['admin'] // Solo Admin crea/gestiona todos los usuarios
   },
   { 
     name: 'Áreas de Horas Sociales', 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -17,34 +17,110 @@ import {
   Clock
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useLegacyDataBridge } from '../hooks/useLegacyDataBridge';
+import { useCommunicationDirectory } from '../hooks/useCommunicationDirectory';
+import { formatFullName } from '../utils/communication';
 
 export const ComunicacionJefatura: React.FC = () => {
   const { user } = useAuth();
   const {
-    mockEstudiantes,
-    mockDocentes,
+    students,
+    teachers,
+    assignments,
+    currentDepartmentHead,
+    hoursLogs,
     isLoading,
     error,
-  } = useLegacyDataBridge();
+  } = useCommunicationDirectory();
   const [busqueda, setBusqueda] = useState('');
   const [tab, setTab] = useState<'docentes' | 'estudiantes'>('docentes');
 
-  const carrerasJefe = user?.carrerasAsignadas || (user?.carrera ? [user.carrera] : []);
-
-  // Solo docentes de Asistencia Docente de las carreras del jefe
-  const docentesCarrera = mockDocentes.filter(doc => {
-    if (doc.area !== 'Asistencia Docente') return false;
-    if (doc.carrerasAsignadas && doc.carrerasAsignadas.length > 0) {
-      return doc.carrerasAsignadas.some(carrera => carrerasJefe.includes(carrera));
+  const carrerasJefe = useMemo(() => {
+    if (currentDepartmentHead) {
+      return [`${currentDepartmentHead.career.code} - ${currentDepartmentHead.career.name}`];
     }
-    return false;
-  });
 
-  // Solo estudiantes de Asistencia Docente de las carreras del jefe
-  const estudiantesCarrera = mockEstudiantes.filter(e =>
-    carrerasJefe.includes(e.carrera) && e.areaActual === 'Asistencia Docente'
-  );
+    return user?.carrerasAsignadas || (user?.carrera ? [user.carrera] : []);
+  }, [currentDepartmentHead, user?.carrera, user?.carrerasAsignadas]);
+
+  const estudiantesCarrera = useMemo(() => {
+    const assignmentsByStudent = new Map<string, typeof assignments>();
+    const approvedHoursByStudent = new Map<string, number>();
+
+    assignments.forEach((assignment) => {
+      const studentAssignments = assignmentsByStudent.get(assignment.student.id) ?? [];
+      studentAssignments.push(assignment);
+      assignmentsByStudent.set(assignment.student.id, studentAssignments);
+    });
+
+    hoursLogs.forEach((log) => {
+      if (log.status !== 'approved') {
+        return;
+      }
+      const approvedHours = approvedHoursByStudent.get(log.student) ?? 0;
+      approvedHoursByStudent.set(log.student, approvedHours + Number.parseFloat(log.reported_hours));
+    });
+
+    return students
+      .map((student) => {
+        const studentAssignments = assignmentsByStudent.get(student.id) ?? [];
+        const carrera = `${student.career.code} - ${student.career.name}`;
+        const assignmentAsistencia = studentAssignments.find(
+          (assignment) => assignment.subarea.area.name === 'Asistencia Docente',
+        );
+        const horasCompletadas = Math.round(approvedHoursByStudent.get(student.id) ?? 0);
+        const horasRequeridas = Math.round(Number.parseFloat(student.required_annual_hours));
+        const activo = student.is_active && student.scholarship_status.toLowerCase() === 'active';
+        const estado = !activo ? 'inactivo' : horasCompletadas >= horasRequeridas ? 'completado' : 'activo';
+
+        return {
+          id: student.id,
+          nombre: formatFullName(student.user.first_name, student.user.last_name),
+          email: student.user.email,
+          matricula: student.student_code,
+          carrera,
+          estado,
+          horasCompletadas,
+          horasRequeridas,
+          areaActual: assignmentAsistencia?.subarea.area.name ?? 'Sin asignar',
+        };
+      })
+      .filter((student) => carrerasJefe.includes(student.carrera) && student.areaActual === 'Asistencia Docente');
+  }, [students, assignments, hoursLogs, carrerasJefe]);
+
+  const docentesCarrera = useMemo(() => {
+    const assignmentsByTeacher = new Map<string, typeof assignments>();
+
+    assignments.forEach((assignment) => {
+      const teacherAssignments = assignmentsByTeacher.get(assignment.teacher_profile.id) ?? [];
+      teacherAssignments.push(assignment);
+      assignmentsByTeacher.set(assignment.teacher_profile.id, teacherAssignments);
+    });
+
+    return teachers
+      .map((teacher) => {
+        const teacherAssignments = assignmentsByTeacher.get(teacher.id) ?? [];
+        const firstAssignment = teacherAssignments[0];
+        return {
+          id: teacher.id,
+          nombre: formatFullName(teacher.user.first_name, teacher.user.last_name),
+          email: teacher.user.email,
+          area: firstAssignment?.subarea.area.name ?? 'Sin área',
+          subarea: firstAssignment?.subarea.name,
+          carrerasAsignadas: [
+            ...new Set(
+              teacherAssignments.map((assignment) => `${assignment.student.career.code} - ${assignment.student.career.name}`),
+            ),
+          ],
+          estudiantesAsignados: [...new Set(teacherAssignments.map((assignment) => assignment.student.id))],
+        };
+      })
+      .filter((docente) => {
+        if (docente.area !== 'Asistencia Docente') {
+          return false;
+        }
+        return docente.carrerasAsignadas.some((carrera) => carrerasJefe.includes(carrera));
+      });
+  }, [teachers, assignments, carrerasJefe]);
 
   const generarGmailLink = (email: string, asunto: string = '', cuerpo: string = '') => {
     const params = new URLSearchParams();
@@ -125,13 +201,13 @@ export const ComunicacionJefatura: React.FC = () => {
               </div>
               <div>
                 <p className="font-semibold text-[#1565C0]">Oficina de Bienestar Estudiantil</p>
-                <p className="text-sm text-gray-600">bienestar@ulsa.mx</p>
+                <p className="text-sm text-gray-600">bienestar.estudiantil@ulsa.edu.ni</p>
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
               <a
                 href={generarGmailLink(
-                  'bienestar@ulsa.mx',
+                  'bienestar.estudiantil@ulsa.edu.ni',
                   'SIBEC - Reporte de Jefatura de Carrera',
                   `Estimada Oficina de Bienestar Estudiantil,\n\nAdjunto el reporte correspondiente a las carreras: ${carrerasJefe.join(', ')}.\n\n\n\n${firma}`
                 )}
@@ -145,7 +221,7 @@ export const ComunicacionJefatura: React.FC = () => {
                 </Button>
               </a>
               <a
-                href={generarGmailLink('bienestar@ulsa.mx')}
+                href={generarGmailLink('bienestar.estudiantil@ulsa.edu.ni')}
                 target="_blank"
                 rel="noopener noreferrer"
               >

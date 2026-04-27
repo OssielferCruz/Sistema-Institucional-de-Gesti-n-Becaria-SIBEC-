@@ -40,23 +40,15 @@ const getCarreraColor = (carrera: string) => {
 
 export const Reportes: React.FC = () => {
   const { user } = useAuth();
-  const { mockEstudiantes, mockDocentes, mockRegistrosHoras, cuatrimestres, areas, isLoading, error } = useLegacyDataBridge();
+  const { mockEstudiantes, mockDocentes, mockRegistrosHoras, Periodos, areas, isLoading, error } = useLegacyDataBridge();
   const [filterCarrera, setFilterCarrera] = useState('todas');
-  const [filterCuatrimestre, setFilterCuatrimestre] = useState('todos');
+  const [filterPeriodo, setFilterPeriodo] = useState('todos');
   const [filterArea, setFilterArea] = useState('todas');
   const [filterEstado, setFilterEstado] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
   const [tab, setTab] = useState<TabReporte>('resumen');
   const [sortField, setSortField] = useState<'nombre' | 'horas' | 'progreso'>('nombre');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-
-  if (isLoading) {
-    return <div className="p-6 text-sm text-gray-500">Cargando reportes...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-sm text-red-600">{error}</div>;
-  }
 
   const isJefatura = user?.role === 'jefatura';
   const carrerasJefe = user?.carrerasAsignadas || (user?.carrera ? [user.carrera] : []);
@@ -97,15 +89,15 @@ export const Reportes: React.FC = () => {
   const filteredEstudiantes = useMemo(() => {
     return baseEstudiantes.filter(e => {
       const matchesCarrera = filterCarrera === 'todas' || e.carrera === filterCarrera;
-      const matchesCuatrimestre = filterCuatrimestre === 'todos' || e.cuatrimestre === filterCuatrimestre;
+      const matchesPeriodo = filterPeriodo === 'todos' || e.Periodo === filterPeriodo;
       const matchesArea = filterArea === 'todas' || e.areaActual === filterArea;
       const matchesEstado = filterEstado === 'todos' || e.estado === filterEstado;
       const matchesBusqueda = !busqueda ||
         e.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
         e.matricula.toLowerCase().includes(busqueda.toLowerCase());
-      return matchesCarrera && matchesCuatrimestre && matchesArea && matchesEstado && matchesBusqueda;
+      return matchesCarrera && matchesPeriodo && matchesArea && matchesEstado && matchesBusqueda;
     });
-  }, [baseEstudiantes, filterCarrera, filterCuatrimestre, filterArea, filterEstado, busqueda]);
+  }, [baseEstudiantes, filterCarrera, filterPeriodo, filterArea, filterEstado, busqueda]);
 
   const sortedEstudiantes = useMemo(() => {
     return [...filteredEstudiantes].sort((a, b) => {
@@ -181,11 +173,11 @@ export const Reportes: React.FC = () => {
   const registrosAprobados = registrosFiltrados.filter(r => r.estado === 'aprobada').length;
   const registrosRechazados = registrosFiltrados.filter(r => r.estado === 'rechazada').length;
 
-  const hasActiveFilters = filterCarrera !== 'todas' || filterCuatrimestre !== 'todos' || filterArea !== 'todas' || filterEstado !== 'todos' || busqueda !== '';
+  const hasActiveFilters = filterCarrera !== 'todas' || filterPeriodo !== 'todos' || filterArea !== 'todas' || filterEstado !== 'todos' || busqueda !== '';
 
   const clearFilters = () => {
     setFilterCarrera('todas');
-    setFilterCuatrimestre('todos');
+    setFilterPeriodo('todos');
     setFilterArea('todas');
     setFilterEstado('todos');
     setBusqueda('');
@@ -234,6 +226,14 @@ export const Reportes: React.FC = () => {
     if (horas <= 100) return { periodo: 2, horasPeriodo: horas - 50 };
     return { periodo: 3, horasPeriodo: horas - 100 };
   };
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Cargando reportes...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-red-600">{error}</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -294,13 +294,13 @@ export const Reportes: React.FC = () => {
             )}
 
             <div className="w-44">
-              <Select value={filterCuatrimestre} onValueChange={setFilterCuatrimestre}>
+              <Select value={filterPeriodo} onValueChange={setFilterPeriodo}>
                 <SelectTrigger className="h-9 text-sm">
-                  <SelectValue placeholder="Cuatrimestre" />
+                  <SelectValue placeholder="Periodo" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  {cuatrimestres.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {Periodos.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>

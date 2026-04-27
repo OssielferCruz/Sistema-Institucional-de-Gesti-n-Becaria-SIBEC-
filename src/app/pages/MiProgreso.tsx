@@ -23,7 +23,7 @@ export const MiProgreso: React.FC = () => {
   }
 
   // Obtener datos del estudiante actual
-  const estudiante = mockEstudiantes.find(e => e.email === user?.email) || mockEstudiantes[0];
+  const estudiante = mockEstudiantes.find(e => e.id === user?.estudianteId) || mockEstudiantes.find(e => e.email === user?.email) || mockEstudiantes[0];
   if (!estudiante) {
     return <div className="p-6 text-sm text-gray-500">No se encontró información del estudiante.</div>;
   }

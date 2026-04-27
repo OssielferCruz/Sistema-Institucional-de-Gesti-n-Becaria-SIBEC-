@@ -17,6 +17,7 @@ import { ComunicacionEstudiante } from './pages/ComunicacionEstudiante';
 import { ComunicacionJefatura } from './pages/ComunicacionJefatura';
 import { ComunicacionAdmin } from './pages/ComunicacionAdmin';
 import { ControlBecados } from './pages/ControlBecados';
+import { GestionUsuarios } from './pages/GestionUsuarios';
 import { AppLayout } from './components/layout/AppLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -109,6 +110,10 @@ export const router = createBrowserRouter([
           {
             path: 'control-becados',
             element: <ControlBecados />,
+          },
+          {
+            path: 'gestion-usuarios',
+            element: <GestionUsuarios />,
           },
         ],
       },
